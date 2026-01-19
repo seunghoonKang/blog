@@ -1,0 +1,86 @@
+<svg
+  width="32"
+  height="32"
+  viewBox="0 0 32 32"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  style="background:#312B2B;border-radius:8px;"
+>
+  <!-- 원본 로고 -->
+  <rect width="32" height="32" rx="8" fill="#312B2B" />
+  <path
+    d="M8.94 16.82H14.77V20.44H8.94V16.82ZM10.19 19.39H13.52V17.87H10.19V19.39ZM14.77 13.18H15.95V14.28H14.77V16.4H13.54V11.14H14.77V13.18ZM9.85 15.68C10.2167 15.36 10.5033 15.0967 10.71 14.89C10.9167 14.6833 11.07 14.49 11.17 14.31C11.2767 14.1233 11.34 13.93 11.36 13.73C11.3867 13.53 11.4 13.2733 11.4 12.96V12.73H10.37V11.66H12.62V13.07C12.62 13.43 12.6 13.7433 12.56 14.01C12.5267 14.2767 12.4433 14.5333 12.31 14.78C12.1767 15.02 11.9733 15.2767 11.7 15.55C11.4267 15.8167 11.0567 16.1367 10.59 16.51L9.85 15.68ZM7.24 15.22C7.6 14.9533 7.88333 14.7267 8.09 14.54C8.29667 14.3533 8.45 14.18 8.55 14.02C8.65 13.86 8.71 13.6933 8.73 13.52C8.75667 13.3467 8.77 13.14 8.77 12.9V12.73H7.58V11.66H9.99V12.99C9.99 13.29 9.97 13.5533 9.93 13.78C9.89 14.0067 9.8 14.2333 9.66 14.46C9.52 14.68 9.31333 14.9167 9.04 15.17C8.77333 15.4233 8.41333 15.7233 7.96 16.07L7.24 15.22ZM18.0416 16.82H23.8716V20.44H18.0416V16.82ZM19.2916 19.39H22.6216V17.87H19.2916V19.39ZM23.8716 13.18H25.0516V14.28H23.8716V16.4H22.6416V11.14H23.8716V13.18ZM18.9516 15.68C19.3182 15.36 19.6049 15.0967 19.8116 14.89C20.0182 14.6833 20.1716 14.49 20.2716 14.31C20.3782 14.1233 20.4416 13.93 20.4616 13.73C20.4882 13.53 20.5016 13.2733 20.5016 12.96V12.73H19.4716V11.66H21.7216V13.07C21.7216 13.43 21.7016 13.7433 21.6616 14.01C21.6282 14.2767 21.5449 14.5333 21.4116 14.78C21.2782 15.02 21.0749 15.2767 20.8016 15.55C20.5282 15.8167 20.1582 16.1367 19.6916 16.51L18.9516 15.68ZM16.3416 15.22C16.7016 14.9533 16.9849 14.7267 17.1916 14.54C17.3982 14.3533 17.5516 14.18 17.6516 14.02C17.7516 13.86 17.8116 13.6933 17.8316 13.52C17.8582 13.3467 17.8716 13.14 17.8716 12.9V12.73H16.6816V11.66H19.0916V12.99C19.0916 13.29 19.0716 13.5533 19.0316 13.78C18.9916 14.0067 18.9016 14.2333 18.7616 14.46C18.6216 14.68 18.4149 14.9167 18.1416 15.17C17.8749 15.4233 17.5149 15.7233 17.0616 16.07L16.3416 15.22Z"
+    fill="#D6D6DB"
+  />
+
+  <!-- ⭐️ 별똥별 그룹 -->
+  <g id="meteors"></g>
+
+  <!-- 스타일 -->
+  <style>
+    @keyframes meteorFall {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0);
+      }
+      10% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-40px, 40px);
+      }
+    }
+
+    .meteor {
+      fill: white;
+      stroke: white;
+      stroke-width: 0.5;
+      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+      animation: meteorFall 1.2s ease-in-out forwards;
+    }
+  </style>
+
+  <!-- 애니메이션 스크립트 -->
+  <script type="application/ecmascript"><![CDATA[
+    const group = document.getElementById("meteors");
+
+    function spawnMeteor() {
+      const count = Math.floor(Math.random() * 3) + 1; // 1~3개 생성
+      for (let i = 0; i < count; i++) {
+        const meteor = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        const tail = document.createElementNS("http://www.w3.org/2000/svg", "line");
+
+        const startX = 28 + Math.random() * 4; // 오른쪽 위 근처
+        const startY = 4 + Math.random() * 4;
+        const radius = Math.random() * 0.7 + 0.6;
+
+        meteor.setAttribute("cx", startX);
+        meteor.setAttribute("cy", startY);
+        meteor.setAttribute("r", radius);
+        meteor.classList.add("meteor");
+
+        // 꼬리 생성 (별 방향 반대쪽으로)
+        tail.setAttribute("x1", startX + 1.5);
+        tail.setAttribute("y1", startY - 1.5);
+        tail.setAttribute("x2", startX);
+        tail.setAttribute("y2", startY);
+        tail.setAttribute("stroke", "white");
+        tail.setAttribute("stroke-width", "0.3");
+        tail.setAttribute("opacity", "0.8");
+        tail.classList.add("meteor");
+
+        group.appendChild(tail);
+        group.appendChild(meteor);
+
+        setTimeout(() => {
+          meteor.remove();
+          tail.remove();
+        }, 1300 + Math.random() * 300);
+      }
+    }
+
+    spawnMeteor();
+    setInterval(spawnMeteor, 5000);
+  ]]></script>
+</svg>

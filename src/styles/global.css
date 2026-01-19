@@ -1,0 +1,338 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@font-face {
+  font-family: "NanumSquareNeo";
+  src: url("/fonts/NanumSquareNeo-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: normal;
+}
+
+/* 라이트 모드 색상 */
+:root,
+html[data-theme="light"] {
+  --background: #ffffff;
+  --foreground: #000000;
+  --muted: #f5f5f5;
+  --border: #e0e0e0;
+  --accent: #1e40af;
+}
+
+/* 다크 모드 색상 */
+html[data-theme="dark"] {
+  --background: #1a1a1a;
+  --foreground: #ffffff;
+  --muted: #2a2a2a;
+  --border: #404040;
+  --accent: #60a5fa;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* body 스타일 */
+body {
+  font-family: "NanumSquareNeo", system-ui, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Prose 스타일 커스터마이징 */
+.prose {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-links: var(--accent);
+  --tw-prose-bold: var(--foreground);
+  --tw-prose-code: var(--foreground);
+  --tw-prose-pre-bg: var(--muted);
+  --tw-prose-quotes: var(--foreground);
+  --tw-prose-quote-borders: var(--border);
+  --tw-prose-hr: var(--border);
+  --tw-prose-th-borders: var(--border);
+  --tw-prose-td-borders: var(--border);
+}
+
+/* 다크모드 prose */
+html[data-theme="dark"] .prose {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-links: var(--accent);
+  --tw-prose-bold: var(--foreground);
+  --tw-prose-code: #e2e8f0;
+  --tw-prose-pre-bg: var(--muted);
+  --tw-prose-quotes: #cbd5e1;
+  --tw-prose-quote-borders: var(--border);
+  --tw-prose-hr: var(--border);
+  --tw-prose-th-borders: var(--border);
+  --tw-prose-td-borders: var(--border);
+}
+
+/* 추가 마크다운 스타일 */
+.prose pre {
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.prose code {
+  /* Notion 기본 인라인 코드 색상: 빨간색 */
+  color: #d44c47;
+  background-color: var(--muted);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+}
+
+/* code 태그의 ::before, ::after 가상 요소 비활성화 (Tailwind Typography 기본 스타일 제거) */
+.prose code::before,
+.prose code::after {
+  content: none;
+}
+
+/* Notion 색상 annotation 지원 */
+/* 코드 텍스트 색상 - 속성 선택자로 기본 색상을 오버라이드 */
+.prose code[data-color="gray"] {
+  color: #787774 !important;
+}
+
+.prose code[data-color="brown"] {
+  color: #9f6b53 !important;
+}
+
+.prose code[data-color="orange"] {
+  color: #d9730d !important;
+}
+
+.prose code[data-color="yellow"] {
+  color: #cb912f !important;
+}
+
+.prose code[data-color="green"] {
+  color: #448361 !important;
+}
+
+.prose code[data-color="blue"] {
+  color: #337ea9 !important;
+}
+
+.prose code[data-color="purple"] {
+  color: #9065b0 !important;
+}
+
+.prose code[data-color="pink"] {
+  color: #c14c8a !important;
+}
+
+.prose code[data-color="red"] {
+  color: #d44c47 !important;
+}
+
+/* 일반 텍스트 색상 - 속성 선택자로 기본 색상을 오버라이드 */
+.prose span[data-color="gray"] {
+  color: #787774 !important;
+}
+
+.prose span[data-color="brown"] {
+  color: #9f6b53 !important;
+}
+
+.prose span[data-color="orange"] {
+  color: #d9730d !important;
+}
+
+.prose span[data-color="yellow"] {
+  color: #cb912f !important;
+}
+
+.prose span[data-color="green"] {
+  color: #448361 !important;
+}
+
+.prose span[data-color="blue"] {
+  color: #337ea9 !important;
+}
+
+.prose span[data-color="purple"] {
+  color: #9065b0 !important;
+}
+
+.prose span[data-color="pink"] {
+  color: #c14c8a !important;
+}
+
+.prose span[data-color="red"] {
+  color: #d44c47 !important;
+}
+
+.prose pre code {
+  /* 코드 블록은 기본 색상 유지 (Shiki 하이라이팅 색상 사용) */
+  color: inherit;
+  background-color: transparent;
+  padding: 0;
+  font-size: 0.875em;
+}
+
+/* Shiki 코드 블록 스타일 - Dual Theme CSS 변수 적용 */
+
+/* Light 모드 (기본) */
+.shiki,
+.shiki span {
+  color: var(--shiki-light) !important;
+  background-color: var(--shiki-light-bg) !important;
+  font-style: var(--shiki-light-font-style) !important;
+  font-weight: var(--shiki-light-font-weight) !important;
+  text-decoration: var(--shiki-light-text-decoration) !important;
+}
+
+.prose pre.shiki {
+  background-color: var(--shiki-light-bg, var(--muted)) !important;
+}
+
+/* Dark 모드 */
+html[data-theme="dark"] .shiki,
+html[data-theme="dark"] .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+html[data-theme="dark"] .prose pre.shiki {
+  background-color: var(--shiki-dark-bg, var(--muted)) !important;
+}
+
+.prose img {
+  border-radius: 0.5rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.prose a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* 콜아웃 스타일 */
+.prose .callout {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  border-radius: 0.5rem;
+  background-color: var(--muted);
+  border-left: 4px solid var(--accent);
+}
+
+.prose .callout-icon {
+  font-size: 1.25rem;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+.prose .callout-content {
+  flex: 1;
+}
+
+.prose .callout-content > *:first-child {
+  margin-top: 0;
+}
+
+.prose .callout-content > *:last-child {
+  margin-bottom: 0;
+}
+
+/* 글 간격 줄이기 */
+.prose p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.prose p:first-child {
+  margin-top: 0;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.prose h1:first-child,
+.prose h2:first-child,
+.prose h3:first-child,
+.prose h4:first-child,
+.prose h5:first-child,
+.prose h6:first-child {
+  margin-top: 0;
+}
+
+.prose ul,
+.prose ol {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose blockquote {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose hr {
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+.prose pre {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+/* Column Layout (노션 나란히 배치) */
+.prose .column-list {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose .column {
+  flex: 1;
+  min-width: 0; /* flexbox 오버플로우 방지 */
+}
+
+.prose .column > *:first-child {
+  margin-top: 0;
+}
+
+.prose .column > *:last-child {
+  margin-bottom: 0;
+}
+
+/* 모바일에서는 세로 배치 */
+@media (max-width: 640px) {
+  .prose .column-list {
+    flex-direction: column;
+  }
+}
