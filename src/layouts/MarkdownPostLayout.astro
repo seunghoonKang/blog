@@ -1,0 +1,124 @@
+---
+interface Props {
+  frontmatter: {
+    title: string;
+    author: string;
+    description: string;
+    pubDate: Date;
+    image?: {
+      url: string;
+      alt: string;
+    };
+    tags: string[];
+  };
+  sidebarHeadings: MarkdownHeading[];
+}
+
+import BaseLayout from "./BaseLayout.astro";
+import type { MarkdownHeading } from "astro";
+
+const { frontmatter, sidebarHeadings } = Astro.props;
+---
+
+<BaseLayout pageTitle={frontmatter.title}>
+  <div class="relative mx-auto max-w-7xl px-4 py-8">
+    <div class="lg:flex lg:gap-8">
+      <!-- 메인 콘텐츠 영역 -->
+      <article class="min-w-0 flex-1">
+        <!-- 헤더 섹션 -->
+        <header class="mb-8">
+          <h1 class="mb-4 text-4xl font-bold">{frontmatter.title}</h1>
+
+          <div
+            class="my-2 flex flex-wrap justify-between gap-2 text-sm text-gray-500 dark:text-gray-400"
+          >
+            <p class="italic">{frontmatter.description}</p>
+            <time datetime={frontmatter.pubDate.toISOString()}>
+              {
+                frontmatter.pubDate.toLocaleDateString("ko-KR", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
+              }
+            </time>
+          </div>
+
+          {
+            frontmatter.image && (
+              <div class="my-6 overflow-hidden rounded-lg">
+                <img
+                  src={frontmatter.image.url}
+                  alt={frontmatter.image.alt}
+                  class="aspect-video w-full object-cover"
+                />
+              </div>
+            )
+          }
+
+          <!-- TODO. 태그 섹션 -->
+          <!-- {
+            frontmatter.tags && frontmatter.tags.length > 0 && (
+              <div class="flex flex-wrap gap-2">
+                {frontmatter.tags.map((tag: string) => (
+                  <a
+                    href={`/tags/${tag}`}
+                    class="rounded-full bg-gray-200 px-3 py-1 text-sm transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+                  >
+                    <span># {tag}</span>
+                  </a>
+                ))}
+              </div>
+            )
+          } -->
+        </header>
+
+        <!-- 마크다운 콘텐츠 -->
+        <div
+          class="prose prose-lg max-w-none dark:prose-invert"
+          id="article-content"
+        >
+          <slot />
+        </div>
+      </article>
+
+      <!-- 목차 사이드바 (넓은 화면에서만 표시) -->
+
+      {
+        sidebarHeadings.length > 0 && (
+          <aside class="sticky top-32 hidden h-fit w-64 flex-shrink-0 border-l border-l-gray-400 pl-3 lg:block">
+            <h2 class="mb-4 text-xl font-semibold">목차</h2>
+            <nav>
+              <ul class="space-y-2">
+                {sidebarHeadings.map(heading => (
+                  <li
+                    class={
+                      heading.depth === 1
+                        ? "pl-2"
+                        : heading.depth === 2
+                          ? "pl-6"
+                          : heading.depth === 3
+                            ? "pl-10"
+                            : ""
+                    }
+                  >
+                    <a
+                      href={`#${heading.slug}`}
+                      class="toc-link block text-sm text-[--tw-prose-code] transition-colors hover:text-blue-600"
+                      set:html={heading.text}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </aside>
+        )
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { smoothScroll } from "../utils/smoothScroll";
+  smoothScroll();
+</script>

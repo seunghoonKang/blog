@@ -1,0 +1,37 @@
+---
+import MarkdownPostLayout from "../../layouts/MarkdownPostLayout.astro";
+import { getPosts, getNoteBySlug, titleToSlug } from "../../utils/notion";
+
+export async function getStaticPaths() {
+  const notes = await getPosts();
+  return notes.map(note => ({
+    params: { slug: titleToSlug(note.title) },
+    props: { noteSlug: titleToSlug(note.title) },
+  }));
+}
+
+const { noteSlug } = Astro.props;
+const noteData = await getNoteBySlug(noteSlug);
+
+if (!noteData) {
+  return Astro.redirect("/notes");
+}
+
+const sidebarHeadings = noteData.headings.filter(
+  heading => heading.depth === 1 || heading.depth === 2 || heading.depth === 3
+);
+---
+
+<MarkdownPostLayout
+  frontmatter={{
+    title: noteData.data.title,
+    pubDate: noteData.data.pubDate,
+    description: noteData.data.description,
+    author: noteData.data.author,
+    image: noteData.data.image,
+    tags: noteData.data.tags,
+  }}
+  sidebarHeadings={sidebarHeadings}
+>
+  <div set:html={noteData.content} />
+</MarkdownPostLayout>
