@@ -1,0 +1,52 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const pageTitle = "글";
+const allPosts = await getCollection("posts");
+
+const groupedPosts = Object.groupBy(allPosts, post => {
+  return new Date(post.data.pubDate).getFullYear();
+});
+
+const sortedGroupEntries = Object.entries(groupedPosts).sort(
+  ([a], [b]) => Number(b) - Number(a)
+);
+---
+
+<BaseLayout pageTitle={pageTitle}>
+  {
+    sortedGroupEntries.map(([year, posts]) => (
+      <section>
+        <div class="mt-10 flex items-baseline-last gap-2">
+          <h2 class="text-2xl font-bold">{year}</h2>
+          <span class="text-sm text-gray-500">({posts?.length})</span>
+        </div>
+        <hr class="mt-1" />
+        <ul class="mt-4">
+          {posts
+            ?.toSorted(
+              (a, b) =>
+                new Date(b.data.pubDate).getTime() -
+                new Date(a.data.pubDate).getTime()
+            )
+            .map(post => (
+              <li>
+                <a
+                  href={`/posts/${post.id}`}
+                  class="block rounded-lg px-4 py-4 transition-all duration-500 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  <div class="flex items-baseline-last justify-between">
+                    <span>{post.data.title}</span>
+                    <span class="ml-2 text-sm text-gray-500">
+                      {new Date(post.data.pubDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                </a>
+              </li>
+            ))}
+        </ul>
+      </section>
+    ))
+  }
+</BaseLayout>

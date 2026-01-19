@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from "astro:content";
+import MarkdownPostLayout from "../../layouts/MarkdownPostLayout.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+  return posts.map(post => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+
+// 사이드바 - 목차에 쓸 헤딩
+const sidebarHeadings = headings.filter(
+  heading => heading.depth === 1 || heading.depth === 2
+);
+---
+
+<MarkdownPostLayout frontmatter={post.data} sidebarHeadings={sidebarHeadings}>
+  <Content />
+</MarkdownPostLayout>
