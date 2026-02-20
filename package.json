@@ -10,12 +10,12 @@
     "cleanup-images": "node scripts/cleanup-original-images.js"
   },
   "dependencies": {
-    "@astrojs/mdx": "^4.3.7",
+    "@astrojs/mdx": "^4.3.13",
     "@notionhq/client": "^5.4.0",
     "@shikijs/transformers": "^3.13.0",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.14",
-    "astro": "^5.14.1",
+    "astro": "^5.17.2",
     "remark-toc": "^9.0.0",
     "sharp": "^0.34.5",
     "shiki": "^3.21.0",
