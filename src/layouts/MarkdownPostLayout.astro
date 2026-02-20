@@ -54,7 +54,7 @@ const { frontmatter, sidebarHeadings } = Astro.props;
                 <img
                   src={frontmatter.image.url}
                   alt={frontmatter.image.alt}
-                  class="aspect-video w-full object-cover"
+                  class="w-full max-h-[70vh] h-auto object-contain"
                 />
               </div>
             )
