@@ -7,8 +7,8 @@ const __dirname = path.dirname(__filename);
 
 const notesImagesDir = path.join(__dirname, "..", "public", "notes-images");
 
-// 삭제할 이미지 확장자 목록
-const imageExtensionsToDelete = [".jpg", ".jpeg", ".png", ".gif"];
+// 삭제할 이미지 확장자 목록 (GIF는 애니메이션 보존을 위해 제외)
+const imageExtensionsToDelete = [".jpg", ".jpeg", ".png"];
 
 async function cleanupOriginalImages() {
   try {
@@ -40,8 +40,8 @@ async function cleanupOriginalImages() {
         const filePath = path.join(noteDirPath, file);
         const ext = path.extname(file).toLowerCase();
 
-        // WebP 파일이 아니고, 삭제 대상 확장자인 경우 삭제
-        if (ext !== ".webp" && ext !== ".svg" && imageExtensionsToDelete.includes(ext)) {
+        // WebP, SVG, GIF는 보존 (GIF는 애니메이션용)
+        if (ext !== ".webp" && ext !== ".svg" && ext !== ".gif" && imageExtensionsToDelete.includes(ext)) {
           try {
             await fs.unlink(filePath);
             console.log(`✓ 삭제: ${dir.name}/${file}`);
