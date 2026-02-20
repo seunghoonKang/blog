@@ -13,11 +13,20 @@ const { pageTitle } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
+    <link
+      rel="preload"
+      href="/fonts/PretendardVariable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
     <script is:inline src="/toggle-theme.js"></script>
   </head>
   <body class="mx-auto my-0 max-w-screen-lg">
     <Header />
-    <main class="py-[8rem]">
+    <main
+      class="pt-[calc(var(--header-height)+var(--space-section-y))] pb-[var(--space-page-y)]"
+    >
       <slot />
     </main>
     <Footer />

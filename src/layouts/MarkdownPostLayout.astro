@@ -21,13 +21,17 @@ const { frontmatter, sidebarHeadings } = Astro.props;
 ---
 
 <BaseLayout pageTitle={frontmatter.title}>
-  <div class="relative mx-auto max-w-7xl px-4 py-8">
-    <div class="lg:flex lg:gap-8">
+  <div
+    class="relative mx-auto max-w-screen-lg px-[var(--space-content)] py-[var(--space-section-y)]"
+  >
+    <div class="md:flex md:gap-[var(--space-section-y)]">
       <!-- 메인 콘텐츠 영역 -->
       <article class="min-w-0 flex-1">
         <!-- 헤더 섹션 -->
-        <header class="mb-8">
-          <h1 class="mb-4 text-4xl font-bold">{frontmatter.title}</h1>
+        <header class="mb-[var(--space-section-y)]">
+          <h1 class="mb-[var(--space-card)] text-4xl font-bold">
+            {frontmatter.title}
+          </h1>
 
           <div
             class="my-2 flex flex-wrap justify-between gap-2 text-sm text-gray-500 dark:text-gray-400"
@@ -74,10 +78,7 @@ const { frontmatter, sidebarHeadings } = Astro.props;
         </header>
 
         <!-- 마크다운 콘텐츠 -->
-        <div
-          class="prose prose-lg max-w-none dark:prose-invert"
-          id="article-content"
-        >
+        <div class="prose max-w-none dark:prose-invert" id="article-content">
           <slot />
         </div>
       </article>
@@ -86,7 +87,7 @@ const { frontmatter, sidebarHeadings } = Astro.props;
 
       {
         sidebarHeadings.length > 0 && (
-          <aside class="sticky top-32 hidden h-fit w-64 flex-shrink-0 border-l border-l-gray-400 pl-3 lg:block">
+          <aside class="sticky top-32 hidden h-fit w-64 flex-shrink-0 border-l border-l-gray-400 pl-3 md:block">
             <h2 class="mb-4 text-xl font-semibold">목차</h2>
             <nav>
               <ul class="space-y-2">

@@ -16,10 +16,11 @@ const sortedGroupEntries = Object.entries(groupedNotes).sort(
 ---
 
 <BaseLayout pageTitle={pageTitle}>
+  <div class="px-[var(--space-content)]">
   {
     sortedGroupEntries.map(([year, yearNotes]) => (
       <section>
-        <div class="mt-10 flex items-baseline-last gap-2">
+        <div class="mt-[var(--space-section-y)] flex items-baseline-last gap-2">
           <h2 class="text-2xl font-bold">{year}</h2>
           <span class="text-sm text-gray-500">({yearNotes?.length})</span>
         </div>
@@ -34,11 +35,11 @@ const sortedGroupEntries = Object.entries(groupedNotes).sort(
               <li>
                 <a
                   href={`/notes/${titleToSlug(note.title)}`}
-                  class="block rounded-lg px-4 py-4 transition-all duration-500 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-800"
+                  class="block rounded-lg px-[var(--space-card)] py-[var(--space-card)] transition-all duration-500 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   <div class="flex flex-col gap-1">
                     <div class="flex items-baseline-last justify-between">
-                      <span>{note.title}</span>
+                      <span class="text-base font-bold">{note.title}</span>
                       <span class="ml-2 text-sm text-gray-500">
                         {new Date(note.pubDate).toLocaleDateString("ko-KR")}
                       </span>
@@ -56,4 +57,5 @@ const sortedGroupEntries = Object.entries(groupedNotes).sort(
       </section>
     ))
   }
+  </div>
 </BaseLayout>
