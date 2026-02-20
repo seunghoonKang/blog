@@ -1,6 +1,7 @@
 import { Client } from "@notionhq/client";
 import fs from "fs/promises";
 import path from "path";
+import katex from "katex";
 import { codeToHtml } from "shiki";
 import sharp from "sharp";
 
@@ -27,15 +28,22 @@ export interface NoteData {
   excerpt?: string; // 짧은 설명 (Notion의 "Slug" 필드)
 }
 
+// Data Source ID 캐시 (빌드/개발 중 중복 API 호출 방지)
+let dataSourceIdCache: string | null = null;
+
 // Database ID에서 Data Source ID를 가져오는 함수
 async function getDataSourceId(databaseId: string): Promise<string> {
+  if (dataSourceIdCache) return dataSourceIdCache;
+
   try {
     const database = (await notion.databases.retrieve({
       database_id: databaseId,
     })) as any;
 
     if (database.data_sources && database.data_sources.length > 0) {
-      return database.data_sources[0].id;
+      const id = database.data_sources[0].id as string;
+      dataSourceIdCache = id;
+      return id;
     }
 
     throw new Error("No data sources found in the database");
@@ -168,12 +176,30 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, m => map[m]);
 }
 
+// LaTeX 수식 렌더링 (displayMode: true = 블록, false = 인라인)
+function renderEquation(expression: string, displayMode: boolean): string {
+  if (!expression?.trim()) return "";
+  try {
+    return katex.renderToString(expression, {
+      displayMode,
+      throwOnError: false,
+    });
+  } catch {
+    return escapeHtml(expression);
+  }
+}
+
 // 🔧 개선: 인라인 코드 스타일 적용을 위한 CSS 클래스 추가
 function richTextToHtml(richText: any[]): string {
   if (!richText || richText.length === 0) return "";
 
   return richText
     .map((text: any) => {
+      // 인라인 수식
+      if (text.type === "equation" && text.equation?.expression) {
+        return renderEquation(text.equation.expression, false);
+      }
+
       let content = text.plain_text || "";
 
       // HTML 특수문자 이스케이프
@@ -245,6 +271,18 @@ async function downloadImage(
 
     await fs.mkdir(imageDir, { recursive: true });
 
+    // 이미 저장된 이미지가 있으면 스킵 (재빌드 시 속도 개선)
+    const existingExtensions = ["webp", "gif", "svg", "png", "jpg"];
+    for (const ext of existingExtensions) {
+      const existingPath = path.join(imageDir, `image-${imageIndex}.${ext}`);
+      try {
+        await fs.access(existingPath);
+        return `/notes-images/${noteSlug}/image-${imageIndex}.${ext}`;
+      } catch {
+        /* 파일 없음, 계속 진행 */
+      }
+    }
+
     const response = await fetch(imageUrl);
     if (!response.ok) {
       throw new Error(`Failed to download image: ${response.statusText}`);
@@ -281,9 +319,15 @@ async function downloadImage(
       return `/notes-images/${noteSlug}/${filename}`;
     }
 
+    // GIF/WebP는 애니메이션 유지를 위해 animated 옵션 사용
+    const isAnimatedFormat = extension === "gif" || extension === "webp";
+    const sharpOptions = isAnimatedFormat
+      ? { animated: true, pages: -1 }
+      : undefined;
+
     // 이미지 최적화
     try {
-      const sharpImage = sharp(buffer);
+      const sharpImage = sharp(buffer, sharpOptions);
       const metadata = await sharpImage.metadata();
 
       const maxWidth = 1920;
@@ -291,7 +335,13 @@ async function downloadImage(
 
       let processedImage = sharpImage;
       if (shouldResize) {
-        processedImage = sharpImage.resize(maxWidth, null, {
+        // 애니메이션 이미지는 pageHeight 기반 리사이즈 필요
+        const pages = metadata.pages ?? 1;
+        const pageHeight = metadata.pageHeight ?? (metadata.height ?? 0) / pages;
+        const resizeHeight =
+          pages > 1 ? Math.round(pageHeight * pages * (maxWidth / metadata.width!)) : undefined;
+
+        processedImage = sharpImage.resize(maxWidth, resizeHeight ?? null, {
           withoutEnlargement: true,
           fit: "inside",
         });
@@ -435,6 +485,14 @@ async function blockToHtml(
     case "divider":
       return `<hr />`;
 
+    case "equation": {
+      const expression = content.expression || "";
+      const equationHtml = renderEquation(expression, true);
+      return equationHtml
+        ? `<div class="equation-block">${equationHtml}</div>`
+        : "";
+    }
+
     case "quote":
       return `<blockquote>${richTextToHtml(content.rich_text || [])}${childrenHtml}</blockquote>`;
 
@@ -444,10 +502,14 @@ async function blockToHtml(
     case "column":
       return `<div class="column">${childrenHtml}</div>`;
 
-    case "callout":
+    case "callout": {
       const calloutText = richTextToHtml(content.rich_text || []);
-      const emoji = content.icon?.emoji || "💡";
-      return `<div class="callout"><span class="callout-icon">${emoji}</span><div class="callout-content">${calloutText}${childrenHtml}</div></div>`;
+      const emoji = content.icon?.emoji;
+      const iconHtml = emoji
+        ? `<span class="callout-icon">${emoji}</span>`
+        : "";
+      return `<div class="callout">${iconHtml}<div class="callout-content">${calloutText}${childrenHtml}</div></div>`;
+    }
 
     case "toggle":
       const toggleText = richTextToHtml(content.rich_text || []);
@@ -469,16 +531,8 @@ export function titleToSlug(title: string): string {
     .replace(/^-+|-+$/g, ""); // 앞뒤 하이픈 제거
 }
 
-// 특정 노트의 상세 정보와 콘텐츠를 가져오는 함수
-export async function getNoteBySlug(slug: string) {
-  const notes = await getPosts();
-  // slug로 먼저 찾고, 없으면 title-slug로 찾기
-  let note = notes.find(n => n.slug === slug);
-  if (!note) {
-    note = notes.find(n => titleToSlug(n.title) === slug);
-  }
-  if (!note) return null;
-
+// 특정 노트의 콘텐츠(블록)만 가져오는 함수 (note 메타데이터 없이)
+export async function getNoteContent(note: NoteData) {
   const allBlocks: any[] = [];
   let cursor: string | undefined = undefined;
   let hasMore = true;
@@ -519,11 +573,24 @@ export async function getNoteBySlug(slug: string) {
         };
       });
 
-    return { data: note, content: htmlContent, headings };
+    return { content: htmlContent, headings };
   } catch (error) {
-    console.error("Error in getNoteBySlug:", error);
-    return { data: note, content: "", headings: [] };
+    console.error("Error in getNoteContent:", error);
+    return { content: "", headings: [] };
   }
+}
+
+// slug로 노트를 찾아 상세 정보와 콘텐츠를 가져오는 함수 (notes가 없을 때 fallback)
+export async function getNoteBySlug(slug: string, notes?: NoteData[]) {
+  const noteList = notes ?? (await getPosts());
+  let note = noteList.find(n => n.slug === slug);
+  if (!note) {
+    note = noteList.find(n => titleToSlug(n.title) === slug);
+  }
+  if (!note) return null;
+
+  const { content, headings } = await getNoteContent(note);
+  return { data: note, content, headings };
 }
 
 // 블록 배열을 순회하며 연속된 리스트 아이템을 그룹화
