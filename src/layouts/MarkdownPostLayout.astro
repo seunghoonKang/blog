@@ -20,7 +20,12 @@ import type { MarkdownHeading } from "astro";
 const { frontmatter, sidebarHeadings } = Astro.props;
 ---
 
-<BaseLayout pageTitle={frontmatter.title}>
+<BaseLayout
+  pageTitle={frontmatter.title}
+  description={frontmatter.description}
+  image={frontmatter.image}
+  ogType="article"
+>
   <div
     class="relative mx-auto max-w-screen-lg px-[var(--space-content)] py-[var(--space-section-y)]"
   >

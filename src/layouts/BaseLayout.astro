@@ -4,7 +4,17 @@ import Footer from "../components/Footer.astro";
 import "katex/dist/katex.min.css";
 import "../styles/global.css";
 
-const { pageTitle } = Astro.props;
+interface Props {
+  pageTitle: string;
+  description?: string;
+  image?: { url: string; alt?: string };
+  ogType?: "website" | "article";
+}
+
+const { pageTitle, description, image, ogType = "website" } = Astro.props;
+
+const pageUrl = Astro.url.href;
+const imageUrl = image?.url ? new URL(image.url, Astro.url).href : undefined;
 ---
 
 <html lang="ko">
@@ -14,6 +24,18 @@ const { pageTitle } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <meta property="og:title" content={pageTitle} />
+    {description && <meta property="og:description" content={description} />}
+    {imageUrl && <meta property="og:image" content={imageUrl} />}
+    {image?.alt && <meta property="og:image:alt" content={image.alt} />}
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content="ko_KR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    {description && <meta name="twitter:description" content={description} />}
+    {imageUrl && <meta name="twitter:image" content={imageUrl} />}
     <link
       rel="preload"
       href="/fonts/PretendardVariable.woff2"
