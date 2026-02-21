@@ -32,10 +32,6 @@ const imageUrl = image?.url ? new URL(image.url, Astro.url).href : undefined;
     <meta property="og:url" content={pageUrl} />
     <meta property="og:type" content={ogType} />
     <meta property="og:locale" content="ko_KR" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={pageTitle} />
-    {description && <meta name="twitter:description" content={description} />}
-    {imageUrl && <meta name="twitter:image" content={imageUrl} />}
     <link
       rel="preload"
       href="/fonts/PretendardVariable.woff2"
