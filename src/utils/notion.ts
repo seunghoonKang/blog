@@ -370,6 +370,24 @@ async function downloadImage(
   }
 }
 
+// 테이블 행 블록 가져오기
+async function fetchTableRows(tableBlockId: string): Promise<any[]> {
+  const rows: any[] = [];
+  let cursor: string | undefined = undefined;
+  let hasMore = true;
+
+  while (hasMore) {
+    const response = await notion.blocks.children.list({
+      block_id: tableBlockId,
+      ...(cursor && { start_cursor: cursor }),
+    });
+    rows.push(...response.results);
+    hasMore = response.has_more;
+    cursor = response.next_cursor || undefined;
+  }
+  return rows;
+}
+
 // 🔧 개선: 에러 핸들링 강화
 async function processChildren(
   blockId: string,
@@ -514,6 +532,36 @@ async function blockToHtml(
     case "toggle":
       const toggleText = richTextToHtml(content.rich_text || []);
       return `<details><summary>${toggleText}</summary>${childrenHtml}</details>`;
+
+    case "table": {
+      const tableRows = await fetchTableRows(block.id);
+      const hasColumnHeader = content.has_column_header ?? false;
+      const hasRowHeader = content.has_row_header ?? false;
+
+      const renderRow = (row: any, isHeaderRow: boolean) =>
+        `<tr>${(row.table_row?.cells ?? [])
+          .map((cell: any[], i: number) => {
+            const tag =
+              isHeaderRow || (hasRowHeader && i === 0) ? "th" : "td";
+            return `<${tag}>${richTextToHtml(cell || [])}</${tag}>`;
+          })
+          .join("")}</tr>`;
+
+      const theadHtml =
+        hasColumnHeader && tableRows.length > 0
+          ? `<thead>${renderRow(tableRows[0], true)}</thead>`
+          : "";
+      const tbodyRows = hasColumnHeader ? tableRows.slice(1) : tableRows;
+      const tbodyHtml = `<tbody>${tbodyRows
+        .map((row: any) => renderRow(row, false))
+        .join("")}</tbody>`;
+
+      return `<div class="table-wrapper"><table class="prose-table">${theadHtml}${tbodyHtml}</table></div>`;
+    }
+
+    case "table_row":
+      // table_row는 table 블록 내부에서 직접 처리되므로 여기 도달하지 않음
+      return "";
 
     default:
       return childrenHtml;
