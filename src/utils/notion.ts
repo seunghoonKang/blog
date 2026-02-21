@@ -176,11 +176,25 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, m => map[m]);
 }
 
+// display 모드에서 \\ 또는 \newline을 올바르게 처리하기 위한 전처리
+// LaTeX 표준: display 모드에서 \\는 동작하지 않음 → gathered 환경으로 감싸기
+function preprocessDisplayEquation(expression: string): string {
+  const trimmed = expression.trim();
+  const hasLineBreak = /\\\\|\\newline/.test(trimmed);
+  const hasEnv = /\\begin\s*\{/.test(trimmed); // 이미 aligned, gathered 등 사용 중
+  if (hasLineBreak && !hasEnv) {
+    return `\\begin{gathered}${trimmed}\\end{gathered}`;
+  }
+  return trimmed;
+}
+
 // LaTeX 수식 렌더링 (displayMode: true = 블록, false = 인라인)
 function renderEquation(expression: string, displayMode: boolean): string {
   if (!expression?.trim()) return "";
+  const processed =
+    displayMode ? preprocessDisplayEquation(expression) : expression.trim();
   try {
-    return katex.renderToString(expression, {
+    return katex.renderToString(processed, {
       displayMode,
       throwOnError: false,
     });
