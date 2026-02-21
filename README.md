@@ -1,4 +1,4 @@
-# Deepthink Blog
+# Blog
 
 Astro 기반의 정적 블로그입니다. Notion을 CMS로 사용하여 콘텐츠를 관리하고, Posts와 Notes 두 가지 타입의 콘텐츠를 지원합니다. (Posts는 추가 예정)
 
