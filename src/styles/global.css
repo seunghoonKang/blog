@@ -316,6 +316,8 @@ html[data-theme="dark"] .prose pre.shiki {
 
 .prose .callout-content {
   flex: 1;
+  min-width: 0; /* flex 오버플로우 방지: 긴 URL/텍스트가 바깥으로 넘침 */
+  overflow-wrap: break-word;
 }
 
 .prose .callout-content > *:first-child {
