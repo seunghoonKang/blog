@@ -17,45 +17,45 @@ const sortedGroupEntries = Object.entries(groupedNotes).sort(
 
 <BaseLayout pageTitle={pageTitle}>
   <div class="px-[var(--space-content)]">
-  {
-    sortedGroupEntries.map(([year, yearNotes]) => (
-      <section>
-        <div class="mt-[var(--space-section-y)] flex items-baseline-last gap-2">
-          <h2 class="text-2xl font-bold">{year}</h2>
-          <span class="text-sm text-gray-500">({yearNotes?.length})</span>
-        </div>
-        <hr class="mt-1" />
-        <ul class="mt-4">
-          {yearNotes
-            ?.toSorted(
-              (a, b) =>
-                new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
-            )
-            .map(note => (
-              <li>
-                <a
-                  href={`/notes/${titleToSlug(note.title)}`}
-                  class="block rounded-lg px-[var(--space-card)] py-[var(--space-card)] transition-all duration-500 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
-                  <div class="flex flex-col gap-1">
-                    <div class="flex items-baseline-last justify-between">
-                      <span class="text-base font-bold">{note.title}</span>
-                      <span class="ml-2 text-sm text-gray-500">
-                        {new Date(note.pubDate).toLocaleDateString("ko-KR")}
-                      </span>
+    {
+      sortedGroupEntries.map(([year, yearNotes]) => (
+        <section>
+          <div class="mt-[var(--space-section-y)] flex items-baseline-last gap-2">
+            <h2 class="text-2xl font-bold">{year}</h2>
+            <span class="text-sm text-gray-500">({yearNotes?.length})</span>
+          </div>
+          <hr class="mt-1" />
+          <ul class="mt-4">
+            {yearNotes
+              ?.toSorted(
+                (a, b) =>
+                  new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
+              )
+              .map(note => (
+                <li>
+                  <a
+                    href={`/notes/${titleToSlug(note.title)}`}
+                    class="block rounded-lg px-[var(--space-card)] py-[var(--space-card)] transition-all duration-500 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    <div class="flex flex-col gap-1">
+                      <div class="flex flex-wrap items-end justify-between gap-2">
+                        <span class="min-w-0 flex-1 line-clamp-2 text-base font-bold">{note.title}</span>
+                        <span class="shrink-0 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(note.pubDate).toLocaleDateString("ko-KR")}
+                        </span>
+                      </div>
+                      {note.excerpt && (
+                        <span class="text-xs text-gray-400 dark:text-gray-500">
+                          {note.excerpt}
+                        </span>
+                      )}
                     </div>
-                    {note.excerpt && (
-                      <span class="text-xs text-gray-400 dark:text-gray-500">
-                        {note.excerpt}
-                      </span>
-                    )}
-                  </div>
-                </a>
-              </li>
-            ))}
-        </ul>
-      </section>
-    ))
-  }
+                  </a>
+                </li>
+              ))}
+          </ul>
+        </section>
+      ))
+    }
   </div>
 </BaseLayout>
