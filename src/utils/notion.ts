@@ -329,7 +329,7 @@ async function downloadImage(
     if (extension === "svg") {
       const filename = `image-${imageIndex}.${extension}`;
       const filePath = path.join(imageDir, filename);
-      await fs.writeFile(filePath, buffer);
+      await fs.writeFile(filePath, new Uint8Array(buffer));
       return `/notes-images/${noteSlug}/${filename}`;
     }
 
@@ -368,14 +368,14 @@ async function downloadImage(
       // WebP 파일만 저장
       const webpFilename = `image-${imageIndex}.webp`;
       const webpFilePath = path.join(imageDir, webpFilename);
-      await fs.writeFile(webpFilePath, webpBuffer);
+      await fs.writeFile(webpFilePath, new Uint8Array(webpBuffer));
 
       return `/notes-images/${noteSlug}/${webpFilename}`;
     } catch (sharpError) {
       console.warn("Image optimization failed, saving original:", sharpError);
       const filename = `image-${imageIndex}.${extension}`;
       const filePath = path.join(imageDir, filename);
-      await fs.writeFile(filePath, buffer);
+      await fs.writeFile(filePath, new Uint8Array(buffer));
       return `/notes-images/${noteSlug}/${filename}`;
     }
   } catch (error) {
@@ -424,9 +424,10 @@ async function processChildren(
     }
 
     const processedBlocks = groupListBlocks(allBlocks);
-    const htmlChunks = await Promise.all(
-      processedBlocks.map(block => blockToHtml(block, noteSlug, imageIndex))
-    );
+    const htmlChunks: string[] = [];
+    for (const block of processedBlocks) {
+      htmlChunks.push(await blockToHtml(block, noteSlug, imageIndex));
+    }
 
     return htmlChunks.join("");
   } catch (error) {
@@ -447,9 +448,10 @@ async function blockToHtml(
   // 그룹화된 리스트 처리
   if (type === "bulleted_list_group" || type === "numbered_list_group") {
     const tag = type === "bulleted_list_group" ? "ul" : "ol";
-    const itemsHtml = await Promise.all(
-      block.items.map((item: any) => blockToHtml(item, noteSlug, imageIndex))
-    );
+    const itemsHtml: string[] = [];
+    for (const item of block.items) {
+      itemsHtml.push(await blockToHtml(item, noteSlug, imageIndex));
+    }
     return `<${tag}>${itemsHtml.join("")}</${tag}>`;
   }
 
@@ -475,7 +477,7 @@ async function blockToHtml(
 
     case "heading_1":
     case "heading_2":
-    case "heading_3":
+    case "heading_3": {
       const depth = type.split("_")[1];
       const text = richTextToHtml(content.rich_text || []);
       const id = text
@@ -483,7 +485,13 @@ async function blockToHtml(
         .toLowerCase()
         .replace(/[^\w\s가-힣-]/g, "") // 한글 지원
         .replace(/\s+/g, "-");
-      return `<h${depth} id="${id}">${text}</h${depth}>${childrenHtml}`;
+      const headingTag = `<h${depth} id="${id}">${text}</h${depth}>`;
+      // Notion 토글 제목(is_toggleable): 접기/펼치기 UI 유지
+      if (content.is_toggleable && childrenHtml) {
+        return `<details class="prose-heading-toggle"><summary>${headingTag}</summary>${childrenHtml}</details>`;
+      }
+      return `${headingTag}${childrenHtml}`;
+    }
 
     case "image":
       const url =
@@ -613,9 +621,10 @@ export async function getNoteContent(note: NoteData) {
     const imageIndex = { current: 1 };
 
     const processedBlocks = groupListBlocks(allBlocks);
-    const htmlChunks = await Promise.all(
-      processedBlocks.map(block => blockToHtml(block, note.slug, imageIndex))
-    );
+    const htmlChunks: string[] = [];
+    for (const block of processedBlocks) {
+      htmlChunks.push(await blockToHtml(block, note.slug, imageIndex));
+    }
     const htmlContent = htmlChunks.join("");
 
     // 헤딩 추출
@@ -627,7 +636,7 @@ export async function getNoteContent(note: NoteData) {
         const plainText = richText.map((t: any) => t.plain_text).join("");
         return {
           depth: parseInt(type.split("_")[1]),
-          text: richTextToHtml(richText),
+          text: plainText,
           slug: plainText
             .toLowerCase()
             .replace(/[^\w\s가-힣-]/g, "")

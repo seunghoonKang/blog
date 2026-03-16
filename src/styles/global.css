@@ -261,7 +261,6 @@ html[data-theme="dark"] .prose pre.shiki {
 
 /* 노션 테이블 스타일 */
 .prose .table-wrapper {
-  margin: var(--space-section-y) 0;
   overflow-x: auto;
 }
 
@@ -396,6 +395,42 @@ html[data-theme="dark"] .prose pre.shiki {
 .prose h5:first-child,
 .prose h6:first-child {
   margin-top: 0;
+}
+
+/* 토글 제목: 마커가 제목 옆에 오도록 (Notion 스타일) */
+.prose details {
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+.prose details:first-child {
+  margin-top: 0;
+}
+.prose details summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  cursor: pointer;
+  list-style: none;
+}
+.prose details summary::-webkit-details-marker {
+  display: none;
+}
+.prose details summary::before {
+  content: "▶";
+  flex-shrink: 0;
+  font-size: 0.85em;
+  transition: transform 0.2s;
+}
+.prose details[open] summary::before {
+  content: "▶";
+  transform: rotate(90deg);
+}
+.prose details summary h1,
+.prose details summary h2,
+.prose details summary h3 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .prose ul,
