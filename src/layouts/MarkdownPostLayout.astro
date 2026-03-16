@@ -111,8 +111,9 @@ const { frontmatter, sidebarHeadings } = Astro.props;
                     <a
                       href={`#${heading.slug}`}
                       class="toc-link block text-sm text-[--tw-prose-code] transition-colors hover:text-blue-600"
-                      set:html={heading.text}
-                    />
+                    >
+                      {heading.text}
+                    </a>
                   </li>
                 ))}
               </ul>
