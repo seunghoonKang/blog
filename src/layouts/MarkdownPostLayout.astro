@@ -1,4 +1,10 @@
 ---
+interface MarkdownHeading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
 interface Props {
   frontmatter: {
     title: string;
@@ -15,7 +21,6 @@ interface Props {
 }
 
 import BaseLayout from "./BaseLayout.astro";
-import type { MarkdownHeading } from "astro";
 
 const { frontmatter, sidebarHeadings } = Astro.props;
 ---
@@ -59,6 +64,8 @@ const { frontmatter, sidebarHeadings } = Astro.props;
                 <img
                   src={frontmatter.image.url}
                   alt={frontmatter.image.alt}
+                  fetchpriority="high"
+                  loading="eager"
                   class="w-full max-h-[70vh] h-auto object-contain"
                 />
               </div>

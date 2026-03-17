@@ -1,7 +1,6 @@
 import { Client } from "@notionhq/client";
 import fs from "fs/promises";
 import path from "path";
-import katex from "katex";
 import { codeToHtml } from "shiki";
 import sharp from "sharp";
 
@@ -177,30 +176,13 @@ function escapeHtml(text: string): string {
 }
 
 // display 모드에서 \\ 또는 \newline을 올바르게 처리하기 위한 전처리
-// LaTeX 표준: display 모드에서 \\는 동작하지 않음 → gathered 환경으로 감싸기
-function preprocessDisplayEquation(expression: string): string {
-  const trimmed = expression.trim();
-  const hasLineBreak = /\\\\|\\newline/.test(trimmed);
-  const hasEnv = /\\begin\s*\{/.test(trimmed); // 이미 aligned, gathered 등 사용 중
-  if (hasLineBreak && !hasEnv) {
-    return `\\begin{gathered}${trimmed}\\end{gathered}`;
-  }
-  return trimmed;
-}
-
-// LaTeX 수식 렌더링 (displayMode: true = 블록, false = 인라인)
+// 수식 → 코드 블록으로 렌더링 (KaTeX 제거, LaTeX 원문 표시)
 function renderEquation(expression: string, displayMode: boolean): string {
   if (!expression?.trim()) return "";
-  const processed =
-    displayMode ? preprocessDisplayEquation(expression) : expression.trim();
-  try {
-    return katex.renderToString(processed, {
-      displayMode,
-      throwOnError: false,
-    });
-  } catch {
-    return escapeHtml(expression);
-  }
+  const escaped = escapeHtml(expression.trim());
+  return displayMode
+    ? `<pre><code>${escaped}</code></pre>`
+    : `<code>${escaped}</code>`;
 }
 
 // 🔧 개선: 인라인 코드 스타일 적용을 위한 CSS 클래스 추가
@@ -499,21 +481,30 @@ async function blockToHtml(
       const caption =
         content.caption?.map((t: any) => t.plain_text).join("") || "";
       if (!url) return "";
+      const isFirstContentImage = imageIndex.current === 1;
       const localPath = await downloadImage(
         url,
         noteSlug,
         imageIndex.current++
       );
+      const loading = isFirstContentImage ? "eager" : "lazy";
+      const fetchPriorityAttr = isFirstContentImage
+        ? ' fetchpriority="high"'
+        : "";
       return caption
-        ? `<figure><img src="${localPath}" alt="${escapeHtml(caption)}" loading="lazy" /><figcaption>${escapeHtml(caption)}</figcaption></figure>`
-        : `<img src="${localPath}" alt="" loading="lazy" />`;
+        ? `<figure><img src="${localPath}" alt="${escapeHtml(caption)}" loading="${loading}"${fetchPriorityAttr} /><figcaption>${escapeHtml(caption)}</figcaption></figure>`
+        : `<img src="${localPath}" alt="" loading="${loading}"${fetchPriorityAttr} />`;
 
     case "code":
       const codeText =
         content.rich_text?.map((t: any) => t.plain_text).join("") || "";
       try {
+        const lang = (content.language || "text")
+          .toLowerCase()
+          .replace(/\s+/g, "");
+        const shikiLang = lang === "plaintext" ? "text" : lang || "text";
         return await codeToHtml(codeText, {
-          lang: content.language || "text",
+          lang: shikiLang,
           themes: { light: "one-light", dark: "tokyo-night" },
           defaultColor: false,
         });

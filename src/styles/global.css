@@ -293,10 +293,6 @@ html[data-theme="dark"] .prose pre.shiki {
   text-align: center;
 }
 
-.prose .equation-block .katex {
-  font-size: 1.1em;
-}
-
 /* 콜아웃 스타일 */
 .prose .callout {
   display: flex;
