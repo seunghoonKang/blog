@@ -44,7 +44,11 @@ const sortedGroupEntries = Object.entries(groupedNotes).sort(
                           {note.title}
                         </span>
                         <span class="shrink-0 text-sm whitespace-nowrap text-gray-500">
-                          {new Date(note.pubDate).toLocaleDateString("ko-KR")}
+                          {new Date(note.pubDate).toLocaleDateString("ko-KR", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          })}
                         </span>
                       </div>
                       {note.excerpt && (

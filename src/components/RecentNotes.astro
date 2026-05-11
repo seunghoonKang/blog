@@ -1,0 +1,78 @@
+---
+import { titleToSlug } from "../utils/notion";
+import type { NoteData } from "../utils/notion";
+
+interface Props {
+  notes: NoteData[];
+}
+
+const { notes } = Astro.props;
+
+function formatPubDate(pubDate: Date) {
+  return new Date(pubDate).toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+---
+
+<section
+  class="mt-[var(--space-section-y)]"
+  aria-labelledby="recent-notes-heading"
+>
+  <h2 id="recent-notes-heading" class="text-2xl font-bold">최근 글</h2>
+
+  <ul
+    class="mt-6 grid grid-cols-1 gap-[var(--space-card)] sm:grid-cols-2 lg:grid-cols-3"
+  >
+    {
+      notes.map((note, i) => {
+        const summary = note.excerpt || note.description;
+        return (
+          <li>
+            <a
+              href={`/notes/${titleToSlug(note.title)}`}
+              class="flex h-full flex-col overflow-hidden rounded-lg transition-all duration-500 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <div class="aspect-video w-full shrink-0 bg-gray-200 dark:bg-gray-700">
+                {note.image ? (
+                  <img
+                    src={note.image.url}
+                    alt={note.image.alt || note.title}
+                    class="h-full w-full object-cover"
+                    loading={i < 2 ? "eager" : "lazy"}
+                    decoding="async"
+                  />
+                ) : (
+                  <div
+                    class="h-full w-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800"
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
+              <div class="flex min-h-0 flex-1 flex-col gap-1 px-[var(--space-card)] py-[var(--space-card)]">
+                <div class="flex flex-wrap items-end justify-between gap-2">
+                  <span class="line-clamp-2 min-w-0 flex-1 text-base font-bold">
+                    {note.title}
+                  </span>
+                  <time
+                    class="shrink-0 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
+                    datetime={new Date(note.pubDate).toISOString()}
+                  >
+                    {formatPubDate(note.pubDate)}
+                  </time>
+                </div>
+                {summary && (
+                  <p class="line-clamp-2 text-xs text-gray-400 dark:text-gray-500">
+                    {summary}
+                  </p>
+                )}
+              </div>
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+</section>
