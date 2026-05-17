@@ -14,7 +14,7 @@ const sortedGroupEntries = Object.entries(groupedPosts).sort(
 );
 ---
 
-<BaseLayout pageTitle={pageTitle}>
+<BaseLayout pageTitle={pageTitle} noindex>
   <div class="px-[var(--space-content)]">
   {
     sortedGroupEntries.map(([year, posts]) => (

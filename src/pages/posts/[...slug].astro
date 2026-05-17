@@ -19,6 +19,10 @@ const sidebarHeadings = headings.filter(
 );
 ---
 
-<MarkdownPostLayout frontmatter={post.data} sidebarHeadings={sidebarHeadings}>
+<MarkdownPostLayout
+  frontmatter={post.data}
+  sidebarHeadings={sidebarHeadings}
+  noindex
+>
   <Content />
 </MarkdownPostLayout>
