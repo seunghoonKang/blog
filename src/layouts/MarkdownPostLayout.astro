@@ -18,11 +18,30 @@ interface Props {
     tags: string[];
   };
   sidebarHeadings: MarkdownHeading[];
+  noindex?: boolean;
 }
 
 import BaseLayout from "./BaseLayout.astro";
 
-const { frontmatter, sidebarHeadings } = Astro.props;
+const { frontmatter, sidebarHeadings, noindex = false } = Astro.props;
+
+const articleImageUrl = frontmatter.image
+  ? new URL(frontmatter.image.url, Astro.url).href
+  : undefined;
+
+const articleJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: frontmatter.title,
+  description: frontmatter.description,
+  datePublished: frontmatter.pubDate.toISOString(),
+  author: {
+    "@type": "Person",
+    name: frontmatter.author,
+  },
+  ...(articleImageUrl ? { image: [articleImageUrl] } : {}),
+  mainEntityOfPage: Astro.url.href,
+};
 ---
 
 <BaseLayout
@@ -30,6 +49,8 @@ const { frontmatter, sidebarHeadings } = Astro.props;
   description={frontmatter.description}
   image={frontmatter.image}
   ogType="article"
+  pubDate={frontmatter.pubDate}
+  noindex={noindex}
 >
   <div
     class="relative mx-auto max-w-screen-lg px-[var(--space-content)] py-[var(--space-section-y)]"
@@ -71,22 +92,6 @@ const { frontmatter, sidebarHeadings } = Astro.props;
               </div>
             )
           }
-
-          <!-- TODO. 태그 섹션 -->
-          <!-- {
-            frontmatter.tags && frontmatter.tags.length > 0 && (
-              <div class="flex flex-wrap gap-2">
-                {frontmatter.tags.map((tag: string) => (
-                  <a
-                    href={`/tags/${tag}`}
-                    class="rounded-full bg-gray-200 px-3 py-1 text-sm transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-                  >
-                    <span># {tag}</span>
-                  </a>
-                ))}
-              </div>
-            )
-          } -->
         </header>
 
         <!-- 마크다운 콘텐츠 -->
@@ -131,6 +136,12 @@ const { frontmatter, sidebarHeadings } = Astro.props;
     </div>
   </div>
 </BaseLayout>
+
+<script
+  is:inline
+  type="application/ld+json"
+  set:html={JSON.stringify(articleJsonLd)}
+/>
 
 <script>
   import { smoothScroll } from "../utils/smoothScroll";
