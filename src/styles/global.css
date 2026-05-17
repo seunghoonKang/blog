@@ -323,12 +323,16 @@ html[data-theme="dark"] .prose pre.shiki {
   margin-bottom: 0;
 }
 
-/* 글 간격 줄이기 */
+/* 문단: 줄 바꿈(행간)과 구분되도록 연속 p 사이만 간격 부여 */
 .prose p {
-  margin-top: 0.15em;
-  margin-bottom: 0.15em;
+  margin-top: 0;
+  margin-bottom: 0;
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+.prose p + p {
+  margin-top: 0.75em;
 }
 
 /* 빈 줄(br만 있는 p) 여백 최소화 */
