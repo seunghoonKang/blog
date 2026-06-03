@@ -12,11 +12,11 @@ const isConfigured = Boolean(repo && repoId && category && categoryId);
     <div class="giscus-container min-h-[200px]" id="giscus-container" />
   ) : (
     import.meta.env.DEV && (
-      <p class="text-sm text-gray-500 dark:text-gray-400">
+      <p class="text-sm text-muted">
         Giscus: <code>.env</code>에 PUBLIC_GISCUS_* 변수를 설정하세요. (
         <a
           href="https://giscus.app/ko"
-          class="underline hover:text-blue-600"
+          class="underline hover:text-[var(--accent)]"
           target="_blank"
           rel="noopener noreferrer"
         >
