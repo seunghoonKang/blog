@@ -5,9 +5,23 @@ let themeValue =
     ? "dark"
     : "light");
 
+function getGiscusTheme() {
+  return themeValue === "dark" ? "dark" : "light";
+}
+
+function notifyGiscusTheme() {
+  const iframe = document.querySelector("iframe.giscus-frame");
+  if (!iframe) return;
+  iframe.contentWindow.postMessage(
+    { giscus: { setConfig: { theme: getGiscusTheme() } } },
+    "https://giscus.app",
+  );
+}
+
 function setTheme() {
   document.documentElement.setAttribute("data-theme", themeValue);
   localStorage.setItem("theme", themeValue);
+  notifyGiscusTheme();
 }
 
 setTheme(); // 즉시 실행

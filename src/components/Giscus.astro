@@ -1,0 +1,72 @@
+---
+const repo = import.meta.env.PUBLIC_GISCUS_REPO;
+const repoId = import.meta.env.PUBLIC_GISCUS_REPO_ID;
+const category = import.meta.env.PUBLIC_GISCUS_CATEGORY;
+const categoryId = import.meta.env.PUBLIC_GISCUS_CATEGORY_ID;
+
+const isConfigured = Boolean(repo && repoId && category && categoryId);
+---
+
+{
+  isConfigured ? (
+    <div class="giscus-container min-h-[200px]" id="giscus-container" />
+  ) : (
+    import.meta.env.DEV && (
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Giscus: <code>.env</code>에 PUBLIC_GISCUS_* 변수를 설정하세요. (
+        <a
+          href="https://giscus.app/ko"
+          class="underline hover:text-blue-600"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          giscus.app
+        </a>
+        )
+      </p>
+    )
+  )
+}
+
+{
+  isConfigured && (
+    <script
+      is:inline
+      define:vars={{
+        repo,
+        repoId,
+        category,
+        categoryId,
+      }}
+    >
+      (function () {
+        function getGiscusTheme() {
+          return document.documentElement.getAttribute("data-theme") === "dark"
+            ? "dark"
+            : "light";
+        }
+
+        var container = document.getElementById("giscus-container");
+        if (!container) return;
+
+        var script = document.createElement("script");
+        script.src = "https://giscus.app/client.js";
+        script.setAttribute("data-repo", repo);
+        script.setAttribute("data-repo-id", repoId);
+        script.setAttribute("data-category", category);
+        script.setAttribute("data-category-id", categoryId);
+        script.setAttribute("data-mapping", "pathname");
+        script.setAttribute("data-strict", "1");
+        script.setAttribute("data-reactions-enabled", "1");
+        script.setAttribute("data-emit-metadata", "0");
+        script.setAttribute("data-input-position", "bottom");
+        script.setAttribute("data-theme", getGiscusTheme());
+        script.setAttribute("data-lang", "ko");
+        script.setAttribute("data-loading", "lazy");
+        script.crossOrigin = "anonymous";
+        script.async = true;
+        container.appendChild(script);
+      })();
+    </script>
+  )
+}

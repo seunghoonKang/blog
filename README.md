@@ -138,6 +138,13 @@ vercel
 
 환경 변수는 배포 플랫폼의 설정에서 추가해야 합니다.
 
+### Giscus 댓글 (notes 글)
+
+1. [blog](https://github.com/seunghoonKang/blog) 레포에서 Discussions 활성화
+2. [Giscus GitHub App](https://github.com/apps/giscus) 설치
+3. [giscus.app](https://giscus.app/ko)에서 `pathname` 매핑·카테고리 설정 후 ID 복사
+4. Vercel(또는 로컬 `.env`)에 `PUBLIC_GISCUS_REPO`, `PUBLIC_GISCUS_REPO_ID`, `PUBLIC_GISCUS_CATEGORY`, `PUBLIC_GISCUS_CATEGORY_ID` 설정 후 재배포
+
 ## 🤝 기여
 
 이슈나 풀 리퀘스트를 환영합니다!
