@@ -24,3 +24,6 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 .vercel
+
+# Moru source assets (generated webp lives in public/images/moru)
+assets-source/

@@ -1,0 +1,53 @@
+---
+const heroBase = "/images/moru";
+---
+
+<section
+  class="mt-[var(--space-section-y)]"
+  aria-labelledby="home-hero-heading"
+>
+  <div
+    class="grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:gap-10"
+  >
+    <div
+      class="media-frame mx-auto w-full max-w-sm overflow-hidden rounded-xl md:mx-0 md:max-w-none"
+      aria-hidden="true"
+    >
+      <picture>
+        <source
+          type="image/webp"
+          srcset={`${heroBase}/hero-400.webp 400w, ${heroBase}/hero-768.webp 768w, ${heroBase}/hero-1280.webp 1280w`}
+          sizes="(max-width: 768px) 100vw, 42vw"
+        />
+        <img
+          src={`${heroBase}/hero.webp`}
+          alt=""
+          width={1280}
+          height={1536}
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          class="h-auto w-full object-contain"
+        />
+      </picture>
+    </div>
+
+    <div>
+      <h1 id="home-hero-heading" class="text-3xl font-bold tracking-tight">
+        개발 노트
+      </h1>
+      <p class="mt-3 text-lg leading-relaxed text-muted">
+        똑똑해서 답을 알려주기보다, “왜 그럴까?”를 같이 파고듭니다. 궁금한 것을
+        기록하고, 천천히 이해해 나갑니다.
+      </p>
+      <p class="mt-4">
+        <a
+          href="/notes"
+          class="text-sm font-medium text-[var(--accent)] underline underline-offset-2 transition-opacity hover:opacity-80"
+        >
+          전체 노트 보기 →
+        </a>
+      </p>
+    </div>
+  </div>
+</section>
