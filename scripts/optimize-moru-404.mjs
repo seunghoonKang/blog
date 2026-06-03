@@ -9,6 +9,9 @@ const root = path.join(__dirname, "..");
 
 /** Visible height ratio after cropping bottom watermark (0.88 = remove bottom 12%) */
 const CROP_RATIO = 0.88;
+const SCALE_WIDTH = 960;
+const FPS = 15;
+const CRF = 27;
 
 const downloadsSource = path.join(
   process.env.HOME ?? "",
@@ -17,10 +20,10 @@ const downloadsSource = path.join(
 );
 const assetsSource = path.join(root, "assets-source/moru/moru_404.mp4");
 const outDir = path.join(root, "public/images/moru");
-const animatedWebp = path.join(outDir, "404.webp");
+const videoMp4 = path.join(outDir, "404.mp4");
+const legacyWebp = path.join(outDir, "404.webp");
 const posterWebp = path.join(outDir, "404-poster.webp");
 const posterFrame = path.join(outDir, "_404-poster-frame.png");
-const tempGif = path.join(outDir, "_404-temp.gif");
 
 function ensureFfmpeg() {
   try {
@@ -54,34 +57,34 @@ async function main() {
   await fs.mkdir(outDir, { recursive: true });
   await fs.copyFile(downloadsSource, assetsSource);
 
-  const cropFilter = `crop=iw:ih*${CROP_RATIO}:0:0`;
+  const videoFilter = `crop=iw:ih*${CROP_RATIO}:0:0,scale=${SCALE_WIDTH}:-2,fps=${FPS}`;
 
-  console.log(`Cropping with: ${cropFilter}`);
+  console.log(`Video filter: ${videoFilter}`);
 
-  // Homebrew ffmpeg often lacks libwebp; crop → GIF → sharp animated WebP
-  const gifFilter = `${cropFilter},fps=24,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`;
   runFfmpeg([
     "-i",
     assetsSource,
     "-vf",
-    gifFilter,
+    videoFilter,
     "-an",
-    "-loop",
-    "0",
-    tempGif,
+    "-c:v",
+    "libx264",
+    "-crf",
+    String(CRF),
+    "-preset",
+    "slow",
+    "-pix_fmt",
+    "yuv420p",
+    "-movflags",
+    "+faststart",
+    videoMp4,
   ]);
 
-  await sharp(tempGif, { animated: true })
-    .webp({ quality: 82, effort: 4 })
-    .toFile(animatedWebp);
-
-  await fs.unlink(tempGif).catch(() => {});
-
   runFfmpeg([
     "-i",
     assetsSource,
     "-vf",
-    cropFilter,
+    `crop=iw:ih*${CROP_RATIO}:0:0,scale=${SCALE_WIDTH}:-2`,
     "-frames:v",
     "1",
     posterFrame,
@@ -92,9 +95,10 @@ async function main() {
     .toFile(posterWebp);
 
   await fs.unlink(posterFrame).catch(() => {});
+  await fs.unlink(legacyWebp).catch(() => {});
 
-  const stats = await fs.stat(animatedWebp);
-  console.log(`Wrote ${animatedWebp} (${(stats.size / 1024).toFixed(0)} KB)`);
+  const stats = await fs.stat(videoMp4);
+  console.log(`Wrote ${videoMp4} (${(stats.size / 1024).toFixed(0)} KB)`);
   console.log(`Wrote ${posterWebp}`);
 }
 

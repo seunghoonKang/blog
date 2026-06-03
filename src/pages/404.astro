@@ -16,20 +16,23 @@ const moruBase = "/images/moru";
       class="not-found-media w-full max-w-5xl overflow-hidden rounded-sm"
       aria-hidden="true"
     >
-      <img
-        src={`${moruBase}/404.webp`}
-        alt=""
-        width={1284}
-        height={630}
-        loading="eager"
-        decoding="async"
-        class="moru-404-animated h-auto w-full object-contain"
+      <video
+        class="moru-404-video h-auto w-full object-contain"
+        src={`${moruBase}/404.mp4`}
+        poster={`${moruBase}/404-poster.webp`}
+        width={960}
+        height={472}
+        autoplay
+        loop
+        muted
+        playsinline
+        preload="auto"
       />
       <img
         src={`${moruBase}/404-poster.webp`}
         alt=""
-        width={1284}
-        height={630}
+        width={960}
+        height={472}
         loading="eager"
         decoding="async"
         class="moru-404-poster h-auto w-full object-contain"
@@ -70,7 +73,7 @@ const moruBase = "/images/moru";
     line-height: 0;
   }
 
-  .not-found-media .moru-404-animated,
+  .not-found-media .moru-404-video,
   .not-found-media .moru-404-poster {
     width: 100%;
     max-height: min(56vh, 36rem);
@@ -78,7 +81,7 @@ const moruBase = "/images/moru";
     object-fit: contain;
   }
 
-  .not-found-media .moru-404-animated {
+  .not-found-media .moru-404-video {
     display: block;
   }
 
@@ -87,7 +90,7 @@ const moruBase = "/images/moru";
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .not-found-media .moru-404-animated {
+    .not-found-media .moru-404-video {
       display: none;
     }
 

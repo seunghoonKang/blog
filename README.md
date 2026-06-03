@@ -127,21 +127,21 @@ Notion DB의 `Image` / `대표 이미지` 필드 → 빌드·dev 시 `public/not
 pnpm moru:hero
 ```
 
-### 404 애니메이션
+### 404 루프 영상
 
 | 경로 | 설명 |
 |------|------|
 | `~/Downloads/moru_404.mp4` | 원본 (스크립트 입력) |
-| `public/images/moru/404.webp` | animated WebP (메인) |
-| `public/images/moru/404-poster.webp` | 정지 프레임 (`prefers-reduced-motion`) |
+| `public/images/moru/404.mp4` | H.264 루프 (메인, `<video>`) |
+| `public/images/moru/404-poster.webp` | 포스터·`prefers-reduced-motion` 정지 |
 
-하단 워터마크 제거용 크롭 후 변환. **ffmpeg** 필요 (`brew install ffmpeg`).
+하단 워터마크 크롭 → 960px·15fps·H.264 인코딩. **ffmpeg** 필요 (`brew install ffmpeg`).
 
 ```bash
 pnpm moru:404
 ```
 
-크롭 비율은 `scripts/optimize-moru-404.mjs`의 `CROP_RATIO`로 조정합니다.
+`scripts/optimize-moru-404.mjs`에서 `CROP_RATIO`, `SCALE_WIDTH`, `FPS`, `CRF`로 조정합니다.
 
 ## 🎨 커스터마이징
 
