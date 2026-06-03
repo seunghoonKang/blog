@@ -1,6 +1,7 @@
 ---
 import MarkdownPostLayout from "../../layouts/MarkdownPostLayout.astro";
 import { getPosts, getNoteContent, titleToSlug } from "../../utils/notion";
+import { getRelatedNotes } from "../../utils/relatedNotes";
 
 export async function getStaticPaths() {
   const notes = await getPosts();
@@ -11,6 +12,11 @@ export async function getStaticPaths() {
 }
 
 const { note } = Astro.props;
+const allNotes = await getPosts();
+const related = getRelatedNotes(allNotes, note).map(n => ({
+  title: n.title,
+  slug: titleToSlug(n.title),
+}));
 const { content, headings } = await getNoteContent(note);
 
 const sidebarHeadings = headings.filter(
@@ -28,6 +34,7 @@ const sidebarHeadings = headings.filter(
     tags: note.tags,
   }}
   sidebarHeadings={sidebarHeadings}
+  relatedNotes={related}
   comments
 >
   <div set:html={content} />

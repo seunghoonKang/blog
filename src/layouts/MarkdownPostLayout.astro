@@ -5,6 +5,11 @@ interface MarkdownHeading {
   text: string;
 }
 
+interface RelatedNote {
+  title: string;
+  slug: string;
+}
+
 interface Props {
   frontmatter: {
     title: string;
@@ -18,15 +23,25 @@ interface Props {
     tags: string[];
   };
   sidebarHeadings: MarkdownHeading[];
+  relatedNotes?: RelatedNote[];
   noindex?: boolean;
   comments?: boolean;
 }
 
 import BaseLayout from "./BaseLayout.astro";
 import Giscus from "../components/Giscus.astro";
+import NoteThumbnail from "../components/NoteThumbnail.astro";
+import { formatArticleDate } from "../utils/formatDate";
 
-const { frontmatter, sidebarHeadings, noindex = false, comments = false } =
-  Astro.props;
+const {
+  frontmatter,
+  sidebarHeadings,
+  relatedNotes = [],
+  noindex = false,
+  comments = false,
+} = Astro.props;
+
+const authorName = frontmatter.author?.trim();
 
 const articleImageUrl = frontmatter.image
   ? new URL(frontmatter.image.url, Astro.url).href
@@ -59,58 +74,98 @@ const articleJsonLd = {
     class="relative mx-auto max-w-screen-lg px-[var(--space-content)] py-[var(--space-section-y)]"
   >
     <div class="md:flex md:gap-[var(--space-section-y)]">
-      <!-- 메인 콘텐츠 영역 -->
       <article class="min-w-0 flex-1">
-        <!-- 헤더 섹션 -->
-        <header class="mb-[var(--space-section-y)]">
-          <h1 class="mb-[var(--space-card)] text-4xl font-bold">
+        <header class="mb-[var(--space-section-y)] max-w-[42rem]">
+          <h1 class="text-4xl font-bold tracking-tight">
             {frontmatter.title}
           </h1>
 
-          <div
-            class="my-2 flex flex-wrap justify-between gap-2 text-sm text-gray-500 dark:text-gray-400"
-          >
-            <p class="italic">{frontmatter.description}</p>
+          <p class="mt-3 text-sm text-muted">
             <time datetime={frontmatter.pubDate.toISOString()}>
-              {
-                frontmatter.pubDate.toLocaleDateString("ko-KR", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })
-              }
+              {formatArticleDate(frontmatter.pubDate)}
             </time>
-          </div>
+            {
+              authorName && (
+                <>
+                  <span aria-hidden="true"> · </span>
+                  <span>{authorName}</span>
+                </>
+              )
+            }
+          </p>
+
+          {
+            frontmatter.description && (
+              <p class="article-lead">{frontmatter.description}</p>
+            )
+          }
 
           {
             frontmatter.image && (
-              <div class="my-6 overflow-hidden rounded-lg">
-                <img
-                  src={frontmatter.image.url}
-                  alt={frontmatter.image.alt}
-                  fetchpriority="high"
+              <div class="my-6">
+                <NoteThumbnail
+                  image={frontmatter.image}
+                  title={frontmatter.title}
+                  variant="hero"
                   loading="eager"
-                  class="w-full max-h-[70vh] h-auto object-contain"
+                  fetchpriority="high"
                 />
               </div>
             )
           }
         </header>
 
-        <!-- 마크다운 콘텐츠 -->
-        <div class="prose max-w-none dark:prose-invert" id="article-content">
+        <div
+          class="prose prose-reading dark:prose-invert"
+          id="article-content"
+        >
           <slot />
         </div>
 
         {
+          frontmatter.tags?.length > 0 && (
+            <div class="prose-reading mt-10 flex flex-wrap gap-2">
+              {frontmatter.tags.map(tag => (
+                <span class="tag-pill">#{tag}</span>
+              ))}
+            </div>
+          )
+        }
+
+        {
+          relatedNotes.length > 0 && (
+            <section
+              class="prose-reading mt-12 border-t border-[var(--border)] pt-8"
+              aria-labelledby="related-notes-heading"
+            >
+              <h2 id="related-notes-heading" class="text-xl font-semibold">
+                다른 노트
+              </h2>
+              <ul class="mt-4 space-y-3">
+                {relatedNotes.map(related => (
+                  <li>
+                    <a
+                      href={`/notes/${related.slug}`}
+                      class="font-medium text-[var(--accent)] underline-offset-2 hover:underline"
+                    >
+                      {related.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+
+        {
           comments && (
             <section
-              class="mt-12 border-t border-gray-200 pt-8 dark:border-gray-700"
+              class="prose-reading mt-12 border-t border-[var(--border)] pt-8"
               aria-label="댓글"
             >
               <h2 class="mb-4 text-xl font-semibold">댓글</h2>
               <Giscus />
-              <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+              <p class="mt-4 text-sm text-muted">
                 GitHub 계정으로 로그인한 뒤 댓글을 남길 수 있습니다.
               </p>
             </section>
@@ -118,29 +173,30 @@ const articleJsonLd = {
         }
       </article>
 
-      <!-- 목차 사이드바 (넓은 화면에서만 표시) -->
-
       {
         sidebarHeadings.length > 0 && (
-          <aside class="sticky top-32 hidden max-h-[calc(100dvh-10rem)] w-64 flex-shrink-0 overflow-y-auto border-l border-l-gray-400 pl-3 md:block">
-            <h2 class="mb-4 text-xl font-semibold">목차</h2>
-            <nav>
+          <aside class="sticky top-32 hidden max-h-[calc(100dvh-10rem)] w-64 shrink-0 overflow-y-auto border-l border-[var(--border)] pl-4 md:block">
+            <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-muted">
+              목차
+            </h2>
+            <nav id="toc-nav" aria-label="목차">
               <ul class="space-y-2">
                 {sidebarHeadings.map(heading => (
                   <li
                     class={
                       heading.depth === 1
-                        ? "pl-2"
+                        ? ""
                         : heading.depth === 2
-                          ? "pl-6"
+                          ? "pl-3"
                           : heading.depth === 3
-                            ? "pl-10"
+                            ? "pl-6"
                             : ""
                     }
                   >
                     <a
                       href={`#${heading.slug}`}
-                      class="toc-link block text-sm text-[--tw-prose-code] transition-colors hover:text-blue-600"
+                      class="toc-link block text-sm"
+                      data-toc-slug={heading.slug}
                     >
                       {heading.text}
                     </a>
@@ -164,4 +220,45 @@ const articleJsonLd = {
 <script>
   import { smoothScroll } from "../utils/smoothScroll";
   smoothScroll();
+
+  function initTocActiveState() {
+    const tocLinks = document.querySelectorAll<HTMLAnchorElement>(
+      "#toc-nav .toc-link[data-toc-slug]"
+    );
+    if (tocLinks.length === 0) return;
+
+    const slugToLink = new Map<string, HTMLAnchorElement>();
+    for (const link of tocLinks) {
+      const slug = link.dataset.tocSlug;
+      if (slug) slugToLink.set(slug, link);
+    }
+
+    const headings = [...slugToLink.keys()]
+      .map(slug => document.getElementById(slug))
+      .filter((el): el is HTMLElement => el !== null);
+
+    if (headings.length === 0) return;
+
+    const setActive = (slug: string | null) => {
+      for (const link of tocLinks) {
+        link.classList.toggle("is-active", link.dataset.tocSlug === slug);
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      entries => {
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .toSorted((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible.length > 0 && visible[0].target.id) {
+          setActive(visible[0].target.id);
+        }
+      },
+      { rootMargin: "-20% 0px -70% 0px", threshold: [0, 0.25, 0.5, 1] }
+    );
+
+    for (const heading of headings) observer.observe(heading);
+  }
+
+  initTocActiveState();
 </script>
