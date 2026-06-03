@@ -267,15 +267,29 @@ async function downloadImage(
 
     await fs.mkdir(imageDir, { recursive: true });
 
-    // 이미 저장된 이미지가 있으면 스킵 (재빌드 시 속도 개선)
-    const existingExtensions = ["webp", "gif", "svg", "png", "jpg"];
-    for (const ext of existingExtensions) {
-      const existingPath = path.join(imageDir, `image-${imageIndex}.${ext}`);
-      try {
-        await fs.access(existingPath);
-        return `/notes-images/${noteSlug}/image-${imageIndex}.${ext}`;
-      } catch {
-        /* 파일 없음, 계속 진행 */
+    const isCoverImage = imageIndex === 0;
+
+    // Notion 대표 이미지(image-0)는 항상 최신 URL에서 다시 받음
+    if (!isCoverImage) {
+      const existingExtensions = ["webp", "gif", "svg", "png", "jpg"];
+      for (const ext of existingExtensions) {
+        const existingPath = path.join(imageDir, `image-${imageIndex}.${ext}`);
+        try {
+          await fs.access(existingPath);
+          return `/notes-images/${noteSlug}/image-${imageIndex}.${ext}`;
+        } catch {
+          /* 파일 없음, 계속 진행 */
+        }
+      }
+    } else {
+      const existingExtensions = ["webp", "gif", "svg", "png", "jpg", "jpeg"];
+      for (const ext of existingExtensions) {
+        const existingPath = path.join(imageDir, `image-${imageIndex}.${ext}`);
+        try {
+          await fs.unlink(existingPath);
+        } catch {
+          /* 없으면 무시 */
+        }
       }
     }
 
