@@ -1,27 +1,38 @@
 ---
 import MarkdownPostLayout from "../../layouts/MarkdownPostLayout.astro";
-import { getPosts, getNoteContent, titleToSlug } from "../../utils/notion";
+import {
+  getPosts,
+  getNoteContent,
+  getNotePathSlug,
+  getNotePathSlugs,
+  buildNoteShareUrl,
+} from "../../utils/notion";
 import { getRelatedNotes } from "../../utils/relatedNotes";
 
 export async function getStaticPaths() {
   const notes = await getPosts();
-  return notes.map(note => ({
-    params: { slug: titleToSlug(note.title) },
-    props: { note },
-  }));
+  return notes.flatMap(note =>
+    getNotePathSlugs(note).map(slug => ({
+      params: { slug },
+      props: { note, canonicalPathSlug: getNotePathSlug(note) },
+    }))
+  );
 }
 
-const { note } = Astro.props;
+const { note, canonicalPathSlug } = Astro.props;
 const allNotes = await getPosts();
 const related = getRelatedNotes(allNotes, note).map(n => ({
   title: n.title,
-  slug: titleToSlug(n.title),
+  slug: getNotePathSlug(n),
 }));
 const { content, headings } = await getNoteContent(note);
 
 const sidebarHeadings = headings.filter(
   heading => heading.depth === 1 || heading.depth === 2 || heading.depth === 3
 );
+
+const shareUrl = buildNoteShareUrl(Astro.site ?? Astro.url, note);
+const canonicalUrl = buildNoteShareUrl(Astro.site ?? Astro.url, note);
 ---
 
 <MarkdownPostLayout
@@ -36,6 +47,9 @@ const sidebarHeadings = headings.filter(
   sidebarHeadings={sidebarHeadings}
   relatedNotes={related}
   comments
+  shareUrl={shareUrl}
+  canonicalPathSlug={canonicalPathSlug}
+  canonicalUrl={canonicalUrl}
 >
   <div set:html={content} />
 </MarkdownPostLayout>

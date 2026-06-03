@@ -1,0 +1,71 @@
+---
+interface Props {
+  shareUrl: string;
+}
+
+const { shareUrl } = Astro.props;
+---
+
+<div class="share-note">
+  <button
+    type="button"
+    class="share-note__button"
+    data-share-url={shareUrl}
+    aria-label="게시글 링크 복사"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+    </svg>
+    <span>링크 복사</span>
+  </button>
+  <span class="share-note__status" role="status" aria-live="polite"></span>
+</div>
+
+<script>
+  function initShareButtons() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>(
+      ".share-note__button[data-share-url]"
+    );
+
+    for (const button of buttons) {
+      const status = button.parentElement?.querySelector(".share-note__status");
+      const shareUrl = button.dataset.shareUrl;
+      if (!shareUrl) continue;
+
+      let resetTimer: ReturnType<typeof setTimeout> | undefined;
+
+      const showStatus = (message: string) => {
+        if (!status) return;
+        status.textContent = message;
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(() => {
+          status.textContent = "";
+        }, 2000);
+      };
+
+      button.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          showStatus("복사됨");
+        } catch {
+          window.prompt("링크를 복사하세요:", shareUrl);
+          showStatus("복사 실패");
+        }
+      });
+    }
+  }
+
+  initShareButtons();
+</script>

@@ -10,6 +10,7 @@ interface Props {
   ogType?: "website" | "article";
   pubDate?: Date;
   noindex?: boolean;
+  canonicalUrl?: string;
 }
 
 const {
@@ -19,11 +20,14 @@ const {
   ogType = "website",
   pubDate,
   noindex = false,
+  canonicalUrl: canonicalUrlProp,
 } = Astro.props;
 
 const siteName = "seunghoonkang.dev";
-const pageUrl = Astro.url.href;
-const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+const canonicalUrl =
+  canonicalUrlProp ??
+  new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+const pageUrl = canonicalUrl;
 const imageUrl = image?.url ? new URL(image.url, Astro.url).href : undefined;
 ---
 

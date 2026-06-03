@@ -1,5 +1,4 @@
 import type { NoteData } from "./notion";
-import { titleToSlug } from "./notion";
 
 export function getRelatedNotes(
   allNotes: NoteData[],

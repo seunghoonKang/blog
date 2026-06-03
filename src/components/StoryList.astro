@@ -6,14 +6,12 @@ interface Props {
   notes: NoteData[];
   heading?: string;
   headingId?: string;
-  showReadMore?: boolean;
 }
 
 const {
   notes,
   heading = "Stories",
   headingId = "stories-heading",
-  showReadMore = true,
 } = Astro.props;
 ---
 
@@ -24,7 +22,7 @@ const {
     {
       notes.map(note => (
         <li>
-          <StoryListItem note={note} showReadMore={showReadMore} />
+          <StoryListItem note={note} />
         </li>
       ))
     }

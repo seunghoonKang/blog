@@ -34,7 +34,7 @@ const sortedGroupEntries = Object.entries(groupedNotes).sort(
               )
               .map(note => (
                 <li>
-                  <StoryListItem note={note} />
+                  <StoryListItem note={note} omitYear />
                 </li>
               ))}
           </ul>
