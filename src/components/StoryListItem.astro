@@ -1,0 +1,57 @@
+---
+import NoteThumbnail from "./NoteThumbnail.astro";
+import { titleToSlug } from "../utils/notion";
+import { formatStoryDate } from "../utils/formatDate";
+import type { NoteData } from "../utils/notion";
+
+interface Props {
+  note: NoteData;
+  showReadMore?: boolean;
+}
+
+const { note, showReadMore = false } = Astro.props;
+const summary = note.excerpt || note.description;
+const displayTags = note.tags?.slice(0, 2) ?? [];
+---
+
+<a href={`/notes/${titleToSlug(note.title)}`} class="story-row">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5">
+    <NoteThumbnail image={note.image} title={note.title} variant="list" />
+    <div class="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-start sm:gap-6">
+      <time
+        class="story-row__date shrink-0 text-sm font-medium text-muted sm:w-20"
+        datetime={new Date(note.pubDate).toISOString()}
+      >
+        {formatStoryDate(note.pubDate)}
+      </time>
+      <div class="min-w-0 flex-1">
+        <span class="story-title text-base font-semibold leading-snug">
+          {note.title}
+        </span>
+        {
+          summary && (
+            <p class="story-summary mt-1 line-clamp-2 text-sm text-muted opacity-80">
+              {summary}
+            </p>
+          )
+        }
+      </div>
+      {
+        displayTags.length > 0 && (
+          <div class="flex shrink-0 flex-wrap gap-1.5 sm:justify-end">
+            {displayTags.map(tag => (
+              <span class="tag-pill">#{tag}</span>
+            ))}
+          </div>
+        )
+      }
+      {
+        showReadMore && (
+          <span class="story-read-more hidden shrink-0 text-sm text-[var(--accent)] sm:inline">
+            더보기 →
+          </span>
+        )
+      }
+    </div>
+  </div>
+</a>

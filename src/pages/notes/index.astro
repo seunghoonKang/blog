@@ -1,12 +1,13 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getPosts, titleToSlug } from "../../utils/notion";
+import StoryListItem from "../../components/StoryListItem.astro";
+import { getPosts } from "../../utils/notion";
+
 const pageTitle = "노트";
-const description = "강승훈의 개발 블로그 글입니다.";
+const description = "개발과 배운 것을 기록한 노트 목록입니다.";
 
 const notes = await getPosts();
 
-// 연도별로 그룹화
 const groupedNotes = Object.groupBy(notes, note => {
   return new Date(note.pubDate).getFullYear();
 });
@@ -20,13 +21,12 @@ const sortedGroupEntries = Object.entries(groupedNotes).sort(
   <div class="px-[var(--space-content)]">
     {
       sortedGroupEntries.map(([year, yearNotes]) => (
-        <section>
-          <div class="mt-[var(--space-section-y)] flex items-baseline-last gap-2">
+        <section class="mt-[var(--space-section-y)]">
+          <div class="year-heading flex items-baseline gap-2">
             <h2 class="text-2xl font-bold">{year}</h2>
-            <span class="text-sm text-gray-500">({yearNotes?.length})</span>
+            <span class="text-sm text-muted">({yearNotes?.length})</span>
           </div>
-          <hr class="mt-1" />
-          <ul class="mt-4">
+          <ul class="mt-4 flex flex-col gap-2">
             {yearNotes
               ?.toSorted(
                 (a, b) =>
@@ -34,30 +34,7 @@ const sortedGroupEntries = Object.entries(groupedNotes).sort(
               )
               .map(note => (
                 <li>
-                  <a
-                    href={`/notes/${titleToSlug(note.title)}`}
-                    class="block rounded-lg px-[var(--space-card)] py-[var(--space-card)] transition-all duration-500 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-800"
-                  >
-                    <div class="flex flex-col gap-1">
-                      <div class="flex flex-wrap items-end justify-between gap-2">
-                        <span class="line-clamp-2 min-w-0 flex-1 text-base font-bold">
-                          {note.title}
-                        </span>
-                        <span class="shrink-0 text-sm whitespace-nowrap text-gray-500">
-                          {new Date(note.pubDate).toLocaleDateString("ko-KR", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                          })}
-                        </span>
-                      </div>
-                      {note.excerpt && (
-                        <span class="text-xs text-gray-400 dark:text-gray-500">
-                          {note.excerpt}
-                        </span>
-                      )}
-                    </div>
-                  </a>
+                  <StoryListItem note={note} />
                 </li>
               ))}
           </ul>

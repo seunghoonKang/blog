@@ -1,0 +1,51 @@
+---
+interface Props {
+  image?: { url: string; alt: string };
+  title: string;
+  variant?: "list" | "hero";
+  loading?: "lazy" | "eager";
+  fetchpriority?: "high" | "low" | "auto";
+}
+
+const {
+  image,
+  title,
+  variant = "list",
+  loading = "lazy",
+  fetchpriority,
+} = Astro.props;
+
+const isHero = variant === "hero";
+const alt = image?.alt || (isHero ? `${title} 커버` : title);
+---
+
+<div
+  class:list={[
+    "media-frame overflow-hidden",
+    isHero ? "rounded-xl" : "aspect-video w-full shrink-0 rounded-lg sm:w-36",
+  ]}
+>
+  {
+    image ? (
+      <img
+        src={image.url}
+        alt={alt}
+        loading={loading}
+        decoding="async"
+        fetchpriority={fetchpriority}
+        class:list={[
+          "h-full w-full",
+          isHero ? "max-h-[70vh] object-contain" : "object-cover",
+        ]}
+      />
+    ) : (
+      <div
+        class:list={[
+          "flex h-full w-full items-center justify-center bg-[var(--muted)] text-xs text-muted",
+          isHero ? "min-h-[12rem]" : "min-h-[4.5rem]",
+        ]}
+        aria-hidden="true"
+      />
+    )
+  }
+</div>

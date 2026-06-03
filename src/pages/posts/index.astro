@@ -19,12 +19,11 @@ const sortedGroupEntries = Object.entries(groupedPosts).sort(
   {
     sortedGroupEntries.map(([year, posts]) => (
       <section>
-        <div class="mt-[var(--space-section-y)] flex items-baseline-last gap-2">
+        <div class="year-heading mt-[var(--space-section-y)] flex items-baseline gap-2">
           <h2 class="text-2xl font-bold">{year}</h2>
-          <span class="text-sm text-gray-500">({posts?.length})</span>
+          <span class="text-sm text-muted">({posts?.length})</span>
         </div>
-        <hr class="mt-1" />
-        <ul class="mt-4">
+        <ul class="mt-4 divide-y divide-[var(--border)]">
           {posts
             ?.toSorted(
               (a, b) =>
@@ -33,13 +32,12 @@ const sortedGroupEntries = Object.entries(groupedPosts).sort(
             )
             .map(post => (
               <li>
-                <a
-                  href={`/posts/${post.id}`}
-                  class="block rounded-lg px-[var(--space-card)] py-[var(--space-card)] transition-all duration-500 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
-                  <div class="flex items-baseline-last justify-between">
-                    <span>{post.data.title}</span>
-                    <span class="ml-2 text-sm text-gray-500">
+                <a href={`/posts/${post.id}`} class="story-row group">
+                  <div class="flex items-baseline justify-between gap-4">
+                    <span class="font-semibold group-hover:text-[var(--accent)]">
+                      {post.data.title}
+                    </span>
+                    <span class="shrink-0 text-sm text-muted">
                       {new Date(post.data.pubDate).toLocaleDateString()}
                     </span>
                   </div>
