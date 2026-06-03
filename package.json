@@ -8,7 +8,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "cleanup-images": "node scripts/cleanup-original-images.js",
-    "moru:hero": "node scripts/optimize-moru-hero.mjs"
+    "moru:hero": "node scripts/optimize-moru-hero.mjs",
+    "moru:404": "node scripts/optimize-moru-404.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",

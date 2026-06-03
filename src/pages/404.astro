@@ -1,29 +1,98 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const pageTitle = "페이지를 찾을 수 없습니다";
+const pageTitle = "길을 잃었어요";
 const description =
-  "요청하신 페이지가 존재하지 않거나, 더 이상 제공되지 않습니다.";
+  "요청한 페이지가 없거나 옮겨졌을 수 있어요.";
+const moruBase = "/images/moru";
 ---
 
 <BaseLayout pageTitle={pageTitle} description={description} noindex>
   <section
-    class="mx-auto flex max-w-screen-md flex-col items-start gap-4 px-[var(--space-content)] py-[var(--space-section-y)]"
+    class="not-found flex min-h-[min(72vh,48rem)] flex-col items-center justify-center gap-10 px-[var(--space-content)] py-8 md:gap-12 md:py-12"
+    aria-labelledby="not-found-heading"
   >
-    <p class="text-sm text-gray-500 dark:text-gray-400">404</p>
-    <h1 class="text-3xl font-bold">{pageTitle}</h1>
-    <p class="text-base text-gray-600 dark:text-gray-300">{description}</p>
-    <div class="mt-4 flex gap-3">
-      <a
-        href="/"
-        class="rounded-md px-3 py-2 text-sm transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black hover:dark:bg-white/15 hover:dark:text-white"
-        >홈으로</a
+    <div
+      class="not-found-media w-full max-w-5xl overflow-hidden rounded-sm"
+      aria-hidden="true"
+    >
+      <img
+        src={`${moruBase}/404.webp`}
+        alt=""
+        width={1284}
+        height={630}
+        loading="eager"
+        decoding="async"
+        class="moru-404-animated h-auto w-full object-contain"
+      />
+      <img
+        src={`${moruBase}/404-poster.webp`}
+        alt=""
+        width={1284}
+        height={630}
+        loading="eager"
+        decoding="async"
+        class="moru-404-poster h-auto w-full object-contain"
+      />
+    </div>
+
+    <div class="max-w-lg text-center">
+      <p class="text-sm text-muted">404</p>
+      <h1
+        id="not-found-heading"
+        class="mt-2 text-2xl font-bold tracking-tight md:text-3xl"
       >
-      <a
-        href="/notes"
-        class="rounded-md px-3 py-2 text-sm transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black hover:dark:bg-white/15 hover:dark:text-white"
-        >노트 보기</a
-      >
+        {pageTitle}
+      </h1>
+      <p class="mt-3 text-base leading-relaxed text-muted md:text-lg">
+        {description}
+      </p>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-4">
+        <a
+          href="/"
+          class="rounded-md px-4 py-2.5 text-sm font-medium text-[var(--accent)] underline-offset-2 transition-opacity hover:opacity-80"
+        >
+          홈으로
+        </a>
+        <a
+          href="/notes"
+          class="text-sm text-muted underline-offset-2 transition-colors hover:text-[var(--accent)]"
+        >
+          노트 보기
+        </a>
+      </div>
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .not-found-media {
+    line-height: 0;
+  }
+
+  .not-found-media .moru-404-animated,
+  .not-found-media .moru-404-poster {
+    width: 100%;
+    max-height: min(56vh, 36rem);
+    margin-inline: auto;
+    object-fit: contain;
+  }
+
+  .not-found-media .moru-404-animated {
+    display: block;
+  }
+
+  .not-found-media .moru-404-poster {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .not-found-media .moru-404-animated {
+      display: none;
+    }
+
+    .not-found-media .moru-404-poster {
+      display: block;
+    }
+  }
+</style>
