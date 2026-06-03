@@ -107,6 +107,42 @@ category: "카테고리"
 포스트 내용...
 ```
 
+## 홈 히어로 이미지 에셋
+
+### 글 커버 (Notion)
+
+Notion DB의 `Image` / `대표 이미지` 필드 → 빌드·dev 시 `public/notes-images/{slug}/image-0.webp`로 저장됩니다. **대표 이미지(image-0)는 매 빌드마다 Notion에서 다시 받습니다.** 본문 안 이미지(image-1+)는 기존 파일이 있으면 스킵합니다.
+
+### 홈 히어로
+
+| 경로 | 설명 |
+|------|------|
+| `~/Downloads/moru_hero_original.jpeg` | 원본 (스크립트 입력) |
+| `assets-source/moru/` | 복사본 (gitignore) |
+| `public/images/moru/hero-*.webp` | 사이트용 webp |
+
+히어로 webp 재생성:
+
+```bash
+pnpm moru:hero
+```
+
+### 404 애니메이션
+
+| 경로 | 설명 |
+|------|------|
+| `~/Downloads/moru_404.mp4` | 원본 (스크립트 입력) |
+| `public/images/moru/404.webp` | animated WebP (메인) |
+| `public/images/moru/404-poster.webp` | 정지 프레임 (`prefers-reduced-motion`) |
+
+하단 워터마크 제거용 크롭 후 변환. **ffmpeg** 필요 (`brew install ffmpeg`).
+
+```bash
+pnpm moru:404
+```
+
+크롭 비율은 `scripts/optimize-moru-404.mjs`의 `CROP_RATIO`로 조정합니다.
+
 ## 🎨 커스터마이징
 
 ### 테마 변경
