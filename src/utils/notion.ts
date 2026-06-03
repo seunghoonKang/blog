@@ -24,11 +24,29 @@ export interface NoteData {
   tags: string[];
   category: string;
   slug: string;
+  urlName: string | null;
   excerpt?: string; // 짧은 설명 (Notion의 "Slug" 필드)
 }
 
 // Data Source ID 캐시 (빌드/개발 중 중복 API 호출 방지)
 let dataSourceIdCache: string | null = null;
+let postsCache: Promise<NoteData[]> | null = null;
+
+const IMAGE_CACHE_FILENAME = ".cache.json";
+const IMAGE_EXTENSIONS = ["webp", "gif", "svg", "png", "jpg", "jpeg"];
+
+interface ImageCacheEntry {
+  pageLastEdited?: string;
+  fileName?: string;
+  localPath: string;
+}
+
+type ImageCacheFile = Record<string, ImageCacheEntry>;
+
+interface CoverImageCacheOptions {
+  pageLastEdited: string;
+  fileName: string;
+}
 
 // Database ID에서 Data Source ID를 가져오는 함수
 async function getDataSourceId(databaseId: string): Promise<string> {
@@ -89,23 +107,111 @@ function getPropertyValue(property: any, type: string): any {
   }
 }
 
+function getFileProperty(
+  property: any
+): { url: string; name: string } | null {
+  if (!property || property.type !== "files") return null;
+  const files = property.files || [];
+  if (files.length === 0) return null;
+  const firstFile = files[0];
+  const url = firstFile.file?.url || firstFile.external?.url || "";
+  if (!url) return null;
+  return { url, name: firstFile.name || "" };
+}
+
+function getImageCacheKey(imageIndex: number): string {
+  return `image-${imageIndex}`;
+}
+
+function getImageCachePath(imageDir: string): string {
+  return path.join(imageDir, IMAGE_CACHE_FILENAME);
+}
+
+async function readImageCache(imageDir: string): Promise<ImageCacheFile> {
+  try {
+    const raw = await fs.readFile(getImageCachePath(imageDir), "utf-8");
+    return JSON.parse(raw) as ImageCacheFile;
+  } catch {
+    return {};
+  }
+}
+
+async function writeImageCacheEntry(
+  imageDir: string,
+  cacheKey: string,
+  entry: ImageCacheEntry
+): Promise<void> {
+  const cache = await readImageCache(imageDir);
+  cache[cacheKey] = entry;
+  await fs.writeFile(
+    getImageCachePath(imageDir),
+    JSON.stringify(cache, null, 2)
+  );
+}
+
+async function tryResolveCachedImage(
+  imageDir: string,
+  noteSlug: string,
+  imageIndex: number,
+  coverCache?: CoverImageCacheOptions
+): Promise<string | null> {
+  if (coverCache) {
+    const cache = await readImageCache(imageDir);
+    const entry = cache[getImageCacheKey(imageIndex)];
+    if (
+      entry &&
+      entry.pageLastEdited === coverCache.pageLastEdited &&
+      entry.fileName === coverCache.fileName &&
+      entry.localPath
+    ) {
+      const localFullPath = path.join(
+        process.cwd(),
+        "public",
+        entry.localPath.replace(/^\//, "")
+      );
+      try {
+        await fs.access(localFullPath);
+        return entry.localPath;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  for (const ext of IMAGE_EXTENSIONS) {
+    const existingPath = path.join(imageDir, `image-${imageIndex}.${ext}`);
+    try {
+      await fs.access(existingPath);
+      return `/notes-images/${noteSlug}/image-${imageIndex}.${ext}`;
+    } catch {
+      /* 파일 없음, 계속 진행 */
+    }
+  }
+  return null;
+}
+
 // Notion 페이지 데이터를 기존 schema 형태로 변환
 async function convertNotionToNoteData(page: any): Promise<NoteData> {
   const props = page.properties;
-  const slug =
-    getPropertyValue(props["url-name"], "rich_text") ||
-    page.id.replace(/-/g, "");
+  const urlNameRaw = getPropertyValue(props["url-name"], "rich_text");
+  const urlName = urlNameRaw?.trim() || null;
+  const slug = urlName || page.id.replace(/-/g, "");
 
   // 대표 이미지 가져오기
+  const imageFile =
+    getFileProperty(props.Image) || getFileProperty(props["대표 이미지"]);
   const imageUrl =
-    getPropertyValue(props.Image, "file") ||
+    imageFile?.url ||
     getPropertyValue(props.Image, "url") ||
-    getPropertyValue(props["대표 이미지"], "file") ||
     getPropertyValue(props["대표 이미지"], "url");
   let imageLocalPath: string | undefined = undefined;
 
   if (imageUrl) {
-    imageLocalPath = await downloadImage(imageUrl, slug, 0);
+    imageLocalPath = await downloadImage(imageUrl, slug, 0, {
+      pageLastEdited: page.last_edited_time || "",
+      fileName: imageFile?.name ?? "",
+    });
   }
 
   return {
@@ -126,12 +232,13 @@ async function convertNotionToNoteData(page: any): Promise<NoteData> {
     tags: getPropertyValue(props.Tags, "multi_select") || [],
     category: getPropertyValue(props.Category, "select") || "",
     slug,
+    urlName,
     excerpt: getPropertyValue(props.Slug, "rich_text") || undefined,
   };
 }
 
 // 데이터베이스에서 포스트 목록을 가져오는 함수
-export async function getPosts(): Promise<NoteData[]> {
+async function fetchPosts(): Promise<NoteData[]> {
   if (!databaseId) {
     throw new Error(
       "NOTION_DATABASE_ID is not defined in environment variables"
@@ -161,6 +268,13 @@ export async function getPosts(): Promise<NoteData[]> {
   );
 
   return notes;
+}
+
+export async function getPosts(): Promise<NoteData[]> {
+  if (!postsCache) {
+    postsCache = fetchPosts();
+  }
+  return postsCache;
 }
 
 // HTML 특수 문자를 이스케이프하는 함수
@@ -255,7 +369,8 @@ function richTextToHtml(richText: any[]): string {
 async function downloadImage(
   imageUrl: string,
   noteSlug: string,
-  imageIndex: number
+  imageIndex: number,
+  coverCache?: CoverImageCacheOptions
 ): Promise<string> {
   try {
     const imageDir = path.join(
@@ -265,32 +380,26 @@ async function downloadImage(
       noteSlug
     );
 
+    const persistCoverCache = async (localPath: string) => {
+      if (coverCache) {
+        await writeImageCacheEntry(imageDir, getImageCacheKey(imageIndex), {
+          pageLastEdited: coverCache.pageLastEdited,
+          fileName: coverCache.fileName,
+          localPath,
+        });
+      }
+    };
+
     await fs.mkdir(imageDir, { recursive: true });
 
-    const isCoverImage = imageIndex === 0;
-
-    // Notion 대표 이미지(image-0)는 항상 최신 URL에서 다시 받음
-    if (!isCoverImage) {
-      const existingExtensions = ["webp", "gif", "svg", "png", "jpg"];
-      for (const ext of existingExtensions) {
-        const existingPath = path.join(imageDir, `image-${imageIndex}.${ext}`);
-        try {
-          await fs.access(existingPath);
-          return `/notes-images/${noteSlug}/image-${imageIndex}.${ext}`;
-        } catch {
-          /* 파일 없음, 계속 진행 */
-        }
-      }
-    } else {
-      const existingExtensions = ["webp", "gif", "svg", "png", "jpg", "jpeg"];
-      for (const ext of existingExtensions) {
-        const existingPath = path.join(imageDir, `image-${imageIndex}.${ext}`);
-        try {
-          await fs.unlink(existingPath);
-        } catch {
-          /* 없으면 무시 */
-        }
-      }
+    const cachedPath = await tryResolveCachedImage(
+      imageDir,
+      noteSlug,
+      imageIndex,
+      coverCache
+    );
+    if (cachedPath) {
+      return cachedPath;
     }
 
     const response = await fetch(imageUrl);
@@ -326,7 +435,9 @@ async function downloadImage(
       const filename = `image-${imageIndex}.${extension}`;
       const filePath = path.join(imageDir, filename);
       await fs.writeFile(filePath, new Uint8Array(buffer));
-      return `/notes-images/${noteSlug}/${filename}`;
+      const localPath = `/notes-images/${noteSlug}/${filename}`;
+      await persistCoverCache(localPath);
+      return localPath;
     }
 
     // GIF/WebP는 애니메이션 유지를 위해 animated 옵션 사용
@@ -366,13 +477,17 @@ async function downloadImage(
       const webpFilePath = path.join(imageDir, webpFilename);
       await fs.writeFile(webpFilePath, new Uint8Array(webpBuffer));
 
-      return `/notes-images/${noteSlug}/${webpFilename}`;
+      const localPath = `/notes-images/${noteSlug}/${webpFilename}`;
+      await persistCoverCache(localPath);
+      return localPath;
     } catch (sharpError) {
       console.warn("Image optimization failed, saving original:", sharpError);
       const filename = `image-${imageIndex}.${extension}`;
       const filePath = path.join(imageDir, filename);
       await fs.writeFile(filePath, new Uint8Array(buffer));
-      return `/notes-images/${noteSlug}/${filename}`;
+      const localPath = `/notes-images/${noteSlug}/${filename}`;
+      await persistCoverCache(localPath);
+      return localPath;
     }
   } catch (error) {
     console.error("Error downloading image:", error);
@@ -606,6 +721,27 @@ export function titleToSlug(title: string): string {
     .replace(/^-+|-+$/g, ""); // 앞뒤 하이픈 제거
 }
 
+export function getNotePathSlug(note: NoteData): string {
+  if (note.urlName) return note.slug;
+  return titleToSlug(note.title);
+}
+
+export function getNotePathSlugs(note: NoteData): string[] {
+  const canonical = getNotePathSlug(note);
+  const titleSlug = titleToSlug(note.title);
+  const slugs = new Set([canonical]);
+  if (titleSlug !== canonical) slugs.add(titleSlug);
+  return [...slugs];
+}
+
+export function buildNoteShareUrl(site: URL | string, note: NoteData): string {
+  const origin =
+    typeof site === "string"
+      ? new URL(site).origin
+      : site.origin || new URL(site.href).origin;
+  return `${origin}/notes/${getNotePathSlug(note)}`;
+}
+
 // 특정 노트의 콘텐츠(블록)만 가져오는 함수 (note 메타데이터 없이)
 export async function getNoteContent(note: NoteData) {
   const allBlocks: any[] = [];
@@ -659,7 +795,10 @@ export async function getNoteContent(note: NoteData) {
 // slug로 노트를 찾아 상세 정보와 콘텐츠를 가져오는 함수 (notes가 없을 때 fallback)
 export async function getNoteBySlug(slug: string, notes?: NoteData[]) {
   const noteList = notes ?? (await getPosts());
-  let note = noteList.find(n => n.slug === slug);
+  let note = noteList.find(n => getNotePathSlug(n) === slug);
+  if (!note) {
+    note = noteList.find(n => n.slug === slug);
+  }
   if (!note) {
     note = noteList.find(n => titleToSlug(n.title) === slug);
   }

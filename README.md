@@ -85,6 +85,7 @@ Astro 기반의 정적 블로그입니다. Notion을 CMS로 사용하여 콘텐�
    - Tags: 태그 (배열)
    - Category: 카테고리
    - Slug: URL 슬러그
+   - url-name (선택): 짧은 공유·canonical URL용 영문 slug (예: `react-hooks`). 비우면 제목 기반 한글 slug 사용
 3. 빌드 시 자동으로 마크다운으로 변환
 
 ### 로컬 마크다운 파일 작성
@@ -111,7 +112,7 @@ category: "카테고리"
 
 ### 글 커버 (Notion)
 
-Notion DB의 `Image` / `대표 이미지` 필드 → 빌드·dev 시 `public/notes-images/{slug}/image-0.webp`로 저장됩니다. **대표 이미지(image-0)는 매 빌드마다 Notion에서 다시 받습니다.** 본문 안 이미지(image-1+)는 기존 파일이 있으면 스킵합니다.
+Notion DB의 `Image` / `대표 이미지` 필드 → 빌드·dev 시 `public/notes-images/{slug}/image-0.webp`로 저장됩니다. **대표 이미지(image-0)**는 `public/notes-images/{slug}/.cache.json`에 페이지 `last_edited_time`과 파일명을 기록해 두고, 둘 다 Notion과 일치할 때만 스킵합니다. 본문 안 이미지(image-1+)는 기존 파일이 있으면 스킵합니다.
 
 ### 홈 히어로
 
