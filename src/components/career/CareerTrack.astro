@@ -1,0 +1,33 @@
+---
+import type { CareerTrack } from "../../data/career";
+import CareerJob from "./CareerJob.astro";
+import CareerSoon from "./CareerSoon.astro";
+
+interface Props {
+  track: CareerTrack;
+}
+
+const { track } = Astro.props;
+const headingId = `${track.id}-heading`;
+---
+
+<section
+  class={`career-track career-track--${track.tone}`}
+  id={track.id}
+  aria-labelledby={headingId}
+>
+  <h2 class="career-track-title" id={headingId}>
+    {track.title}
+  </h2>
+
+  {
+    track.soon && (
+      <CareerSoon
+        badge={track.soon.badge}
+        period={track.soon.period}
+      />
+    )
+  }
+
+  {track.jobs.map((job) => <CareerJob job={job} />)}
+</section>

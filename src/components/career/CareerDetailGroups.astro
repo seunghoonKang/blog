@@ -1,0 +1,30 @@
+---
+import type { DetailGroup, DetailLabel } from "../../data/career";
+
+interface Props {
+  groups: DetailGroup[];
+}
+
+const { groups } = Astro.props;
+
+function toneClass(label: DetailLabel) {
+  // 배경·수행: 동일 톤 / 성과: 강조
+  if (label === "성과") return "career-rl career-rl--result";
+  return "career-rl career-rl--base";
+}
+---
+
+{
+  groups.map((group) => (
+    <div class="career-group">
+      {group.title && <h4 class="career-group-title">{group.title}</h4>}
+      {group.note && <p class="career-group-note">{group.note}</p>}
+      {group.rows.map((row) => (
+        <div class="career-row">
+          <div class={toneClass(row.label)}>{row.label}</div>
+          <div class="career-rb" set:html={row.text} />
+        </div>
+      ))}
+    </div>
+  ))
+}

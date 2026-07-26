@@ -1,0 +1,511 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CareerTrack from "../components/career/CareerTrack.astro";
+import {
+  careerIntro,
+  education,
+  engineeringTrack,
+  logisticsTrack,
+  skills,
+} from "../data/career";
+
+const pageTitle = "강승훈 · seunghoonkang.dev";
+const description =
+  "물류 운영과 프론트엔드 개발을 모두 경험한 강승훈의 소개. 트랙별로 나눈 이력과 성과를 정리합니다.";
+---
+
+<BaseLayout pageTitle={pageTitle} description={description}>
+  <div class="career-page px-[var(--space-content)]">
+    <header class="career-intro">
+      <h1 class="career-name text-4xl font-bold tracking-tight">
+        {careerIntro.title}
+        <span class="career-name-en">{careerIntro.titleEn}</span>
+      </h1>
+      <nav class="career-anchors mt-6 flex flex-wrap gap-4" aria-label="경력 트랙">
+        <a
+          href={`#${logisticsTrack.id}`}
+          class="career-anchor career-anchor--teal text-sm font-medium underline underline-offset-2 transition-opacity hover:opacity-80"
+        >
+          물류 경력 →
+        </a>
+        <a
+          href={`#${engineeringTrack.id}`}
+          class="career-anchor career-anchor--violet text-sm font-medium underline underline-offset-2 transition-opacity hover:opacity-80"
+        >
+          개발 경력 →
+        </a>
+      </nav>
+    </header>
+
+    <CareerTrack track={logisticsTrack} />
+    <CareerTrack track={engineeringTrack} />
+
+    <section
+      class="career-track career-track--neutral"
+      id="meta"
+      aria-labelledby="meta-heading"
+    >
+      <h2 class="career-track-title" id="meta-heading">
+        학력 · 역량
+      </h2>
+      <article class="career-job">
+        <div class="career-job-top">
+          <div class="career-job-name">
+            {education.school}
+            <em>· {education.major}</em>
+          </div>
+          <div class="career-job-meta">{education.period}</div>
+        </div>
+      </article>
+      <article class="career-job">
+        <dl class="career-skills">
+          {
+            skills.map((s) => (
+              <>
+                <dt>{s.label}</dt>
+                <dd>{s.value}</dd>
+              </>
+            ))
+          }
+        </dl>
+      </article>
+    </section>
+
+    <section
+      class="career-track career-track--neutral career-contact"
+      id="contact"
+      aria-labelledby="contact-heading"
+    >
+      <h2 class="career-track-title" id="contact-heading">
+        연락처
+      </h2>
+      <p>
+        Email
+        <a href={`mailto:${careerIntro.email}`}>{careerIntro.email}</a>
+      </p>
+      <p>
+        <a
+          href={careerIntro.github}
+          target="_blank"
+          rel="noopener noreferrer">GitHub</a
+        >
+        ·
+        <a
+          href={careerIntro.linkedin}
+          target="_blank"
+          rel="noopener noreferrer">LinkedIn</a
+        >
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .career-intro {
+    margin-bottom: calc(var(--space-section-y) * 0.5);
+  }
+
+  .career-name-en {
+    display: inline-block;
+    margin-left: 0.65rem;
+    font-size: var(--text-xl);
+    font-weight: 500;
+    color: var(--muted-foreground);
+    letter-spacing: -0.01em;
+  }
+
+  .career-anchors {
+    margin-bottom: calc(var(--space-section-y) * 1.25);
+  }
+
+  .career-anchor--teal {
+    color: var(--accent);
+  }
+
+  .career-anchor--violet {
+    color: #6b5b95;
+  }
+
+  :global(html[data-theme="dark"]) .career-anchor--violet {
+    color: #a78bfa;
+  }
+
+  :global(.career-track) {
+    --career-accent: var(--accent);
+    --career-accent-muted: var(--accent-muted);
+    margin-top: calc(var(--space-section-y) * 2.25);
+  }
+
+  :global(.career-track--teal) {
+    --career-accent: var(--accent);
+    --career-accent-muted: var(--accent-muted);
+  }
+
+  :global(.career-track--violet) {
+    --career-accent: #6b5b95;
+    --career-accent-muted: color-mix(
+      in srgb,
+      #6b5b95 12%,
+      var(--background)
+    );
+  }
+
+  :global(html[data-theme="dark"] .career-track--violet) {
+    --career-accent: #a78bfa;
+    --career-accent-muted: color-mix(
+      in srgb,
+      #a78bfa 18%,
+      var(--background)
+    );
+  }
+
+  :global(.career-track--neutral) {
+    --career-accent: var(--border);
+    --career-accent-muted: var(--muted);
+  }
+
+  :global(.career-track-title) {
+    margin: 0 0 1.5rem;
+    padding-left: var(--space-card);
+    border-left: 3px solid var(--career-accent, var(--accent));
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: var(--text-3xl--line-height);
+  }
+
+  :global(.career-job) {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  :global(.career-job:last-child) {
+    border-bottom: none;
+  }
+
+  :global(.career-job-top) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem 1rem;
+  }
+
+  :global(.career-job-name) {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    line-height: var(--text-2xl--line-height);
+    letter-spacing: -0.02em;
+  }
+
+  :global(.career-job-name em) {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    font-size: var(--text-lg);
+    margin-left: 0.35rem;
+  }
+
+  :global(.career-job-meta) {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  :global(.career-job-desc) {
+    margin: 0.5rem 0 0;
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    color: var(--muted-foreground);
+  }
+
+  :global(.career-highlights) {
+    margin: 0.85rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  :global(.career-highlights li) {
+    position: relative;
+    padding-left: 0.9rem;
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+
+  :global(.career-highlights li::before) {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--career-accent);
+  }
+
+  :global(.metric) {
+    color: var(--career-accent);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  :global(.career-tags) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.55rem;
+  }
+
+  :global(.career-track--violet .tag-pill) {
+    color: var(--career-accent);
+    background-color: var(--career-accent-muted);
+  }
+
+  :global(.career-more) {
+    margin-top: 1.25rem;
+  }
+
+  :global(.career-more > summary) {
+    cursor: pointer;
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0.55rem 0.95rem;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--career-accent);
+    user-select: none;
+    border: 1px solid var(--career-accent);
+    border-radius: 0.5rem;
+    background: var(--career-accent-muted);
+    transition:
+      transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1),
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  :global(.career-more > summary::-webkit-details-marker) {
+    display: none;
+  }
+
+  :global(.career-more-label) {
+    display: inline;
+  }
+
+  :global(.career-more-arrow) {
+    display: inline-block;
+    font-weight: 600;
+    transition: transform 0.25s ease;
+  }
+
+  :global(.career-more[open] > summary) {
+    background: color-mix(
+      in srgb,
+      var(--career-accent) 18%,
+      var(--background)
+    );
+  }
+
+  :global(.career-more[open] > summary .career-more-arrow) {
+    transform: rotate(90deg);
+  }
+
+  :global(.career-more > summary:hover) {
+    background: color-mix(
+      in srgb,
+      var(--career-accent) 22%,
+      var(--background)
+    );
+    border-color: var(--career-accent);
+  }
+
+  :global(.career-more > summary:focus-visible) {
+    outline: 2px solid var(--career-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.career-more > summary:hover) {
+      transform: translateX(0.25rem);
+    }
+
+    :global(.career-project > summary:hover) {
+      transform: translateX(0.35rem);
+    }
+
+    :global(.career-project > summary:hover .career-project-label) {
+      background-size: 100% 2px;
+    }
+  }
+
+  :global(.career-detail-body) {
+    margin-top: 0.85rem;
+    margin-left: 0.25rem;
+    padding: 1rem 0 0.25rem 1.25rem;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  :global(.career-group + .career-group) {
+    margin-top: 0.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  :global(.career-group-title) {
+    margin: 0 0 0.5rem;
+    font-size: var(--text-xl);
+    font-weight: 700;
+    line-height: var(--text-xl--line-height);
+  }
+
+  :global(.career-group-note) {
+    margin: 0 0 0.65rem;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+
+  :global(.career-row) {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    column-gap: 0.75rem;
+    margin-top: 0.5rem;
+    align-items: start;
+  }
+
+  :global(.career-rl) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 100%;
+    /* 본문 첫 줄(1rem × 1.7)과 같은 높이로 맞춤 */
+    min-height: 1.7rem;
+    padding: 0 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-align: center;
+    border-radius: 0.25rem;
+  }
+
+  /* 배경 · 수행 — 동일 */
+  :global(.career-rl--base) {
+    border: 1px solid var(--border);
+    color: var(--muted-foreground);
+    background: var(--muted);
+  }
+
+  /* 성과 — 트랙 액센트로 강조 */
+  :global(.career-rl--result) {
+    border: 1px solid var(--career-accent);
+    color: var(--career-accent);
+    background: var(--career-accent-muted);
+  }
+
+  :global(.career-rb) {
+    margin: 0;
+    padding-top: 0;
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  :global(.career-rb code) {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 0.78em;
+    background: var(--muted);
+    padding: 0.05rem 0.3rem;
+    border-radius: 0.25rem;
+  }
+
+  :global(.career-project) {
+    border: none;
+    border-radius: 0;
+    padding: 0.35rem 0;
+    background: transparent;
+  }
+
+  :global(.career-project > summary) {
+    cursor: pointer;
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--text-xl);
+    font-weight: 700;
+    line-height: var(--text-xl--line-height);
+    color: var(--foreground);
+    border-radius: 0.25rem;
+    transition: transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+
+  :global(.career-project > summary::-webkit-details-marker) {
+    display: none;
+  }
+
+  :global(.career-project > summary::before) {
+    content: "▸";
+    color: var(--career-accent);
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+
+  :global(.career-project[open] > summary::before) {
+    content: "▾";
+  }
+
+  :global(.career-project-label) {
+    display: inline;
+    background-image: linear-gradient(
+      var(--career-accent, var(--accent)),
+      var(--career-accent, var(--accent))
+    );
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 2px;
+    transition: background-size 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  :global(.career-project .career-group),
+  :global(.career-project .career-group-note) {
+    padding-left: 0.75rem;
+  }
+
+  .career-skills {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: 0.5rem 1rem;
+    font-size: var(--text-base);
+    margin: 0;
+  }
+
+  .career-skills dt {
+    font-weight: 700;
+    color: var(--muted-foreground);
+  }
+
+  .career-skills dd {
+    margin: 0;
+  }
+
+  .career-contact a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .career-contact p {
+    margin: 0.35rem 0;
+    font-size: var(--text-base);
+  }
+</style>

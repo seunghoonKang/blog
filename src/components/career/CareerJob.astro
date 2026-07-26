@@ -1,0 +1,79 @@
+---
+import type { CareerJob } from "../../data/career";
+import CareerDetailGroups from "./CareerDetailGroups.astro";
+
+interface Props {
+  job: CareerJob;
+}
+
+const { job } = Astro.props;
+const hasExpand =
+  (job.details && job.details.length > 0) ||
+  (job.projects && job.projects.length > 0);
+---
+
+<article class="career-job">
+  <div class="career-job-top">
+    <div class="career-job-name">
+      {job.company}
+      {
+        job.role && (
+          <em>
+            · {job.role}
+          </em>
+        )
+      }
+    </div>
+    {job.period && <div class="career-job-meta">{job.period}</div>}
+  </div>
+
+  {
+    job.tags && job.tags.length > 0 && (
+      <div class="career-tags">
+        {job.tags.map((tag) => (
+          <span class="tag-pill">{tag}</span>
+        ))}
+      </div>
+    )
+  }
+
+  {job.description && <p class="career-job-desc">{job.description}</p>}
+
+  {
+    job.highlights && job.highlights.length > 0 && (
+      <ul class="career-highlights">
+        {job.highlights.map((h) => (
+          <li set:html={h.html} />
+        ))}
+      </ul>
+    )
+  }
+
+  {
+    hasExpand && (
+      <details class="career-more">
+        <summary>
+          <span class="career-more-label"
+            >{job.detailsSummary ?? "자세히 보기"}</span
+          >
+          <span class="career-more-arrow" aria-hidden="true">→</span>
+        </summary>
+        <div class="career-detail-body">
+          {job.projects &&
+            job.projects.map((project) => (
+              <details class="career-project">
+                <summary>
+                  <span class="career-project-label">{project.title}</span>
+                </summary>
+                {project.note && (
+                  <p class="career-group-note">{project.note}</p>
+                )}
+                <CareerDetailGroups groups={project.groups} />
+              </details>
+            ))}
+          {job.details && <CareerDetailGroups groups={job.details} />}
+        </div>
+      </details>
+    )
+  }
+</article>
