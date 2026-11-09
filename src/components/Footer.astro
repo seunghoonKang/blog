@@ -1,10 +1,19 @@
 ---
 import SocialLinks from "./SocialLinks.astro";
+
+interface Props {
+  width?: "narrow" | "wide";
+}
+
+const { width = "narrow" } = Astro.props;
 ---
 
 <footer
-  class="my-[var(--space-content)] mr-7 flex flex-col items-end gap-3 lg:mr-0"
+  class:list={[
+    "mx-auto flex w-full items-center justify-between gap-3 border-t border-[var(--border)] px-[var(--space-content)] pt-6 pb-10",
+    width === "wide" ? "max-w-[720px]" : "max-w-[var(--content-max)]",
+  ]}
 >
+  <p class="text-muted text-sm">© 2026 강승훈</p>
   <SocialLinks />
-  <p class="text-sm text-muted">Copyright © 2026. 강승훈.</p>
 </footer>

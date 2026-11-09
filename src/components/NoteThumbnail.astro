@@ -19,33 +19,38 @@ const isHero = variant === "hero";
 const alt = image?.alt || (isHero ? `${title} 커버` : title);
 ---
 
-<div
-  class:list={[
-    "media-frame overflow-hidden",
-    isHero ? "rounded-xl" : "aspect-video w-full shrink-0 rounded-lg sm:w-36",
-  ]}
->
-  {
-    image ? (
+{
+  image && (
+    <div
+      class:list={[
+        "media-thumb relative w-full overflow-hidden rounded-xl bg-[var(--muted)]",
+        isHero ? "" : "story-thumb h-[200px]",
+      ]}
+    >
       <img
         src={image.url}
         alt={alt}
         loading={loading}
         decoding="async"
         fetchpriority={fetchpriority}
+        onload="this.parentElement.dataset.loaded = ''"
+        onerror="this.parentElement.dataset.loaded = ''"
         class:list={[
-          "h-full w-full",
-          isHero ? "max-h-[70vh] object-contain" : "object-cover",
+          "block w-full",
+          isHero ? "h-auto max-h-[70vh] object-contain" : "h-full object-cover",
         ]}
       />
-    ) : (
-      <div
-        class:list={[
-          "flex h-full w-full items-center justify-center bg-[var(--muted)] text-xs text-muted",
-          isHero ? "min-h-[12rem]" : "min-h-[4.5rem]",
-        ]}
-        aria-hidden="true"
-      />
-    )
-  }
-</div>
+      {!isHero && <div class="media-shimmer" aria-hidden="true" />}
+    </div>
+  )
+}
+
+<script>
+  // 캐시된 이미지는 hydration 전에 load가 끝나 onload를 놓칠 수 있음
+  document
+    .querySelectorAll<HTMLImageElement>(".media-thumb img")
+    .forEach(img => {
+      if (img.complete && img.parentElement)
+        img.parentElement.dataset.loaded = "";
+    });
+</script>

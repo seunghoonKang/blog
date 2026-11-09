@@ -3,9 +3,12 @@ import Navigation from "./Navigation.astro";
 ---
 
 <header
-  class="fixed top-0 right-0 left-0 z-50 bg-gradient-to-b from-[var(--background)] via-[var(--background)] via-35% to-transparent py-5 backdrop-blur-sm"
+  class="pointer-events-none fixed top-[var(--dock-top)] right-0 left-0 z-50 flex justify-center px-[var(--space-content)]"
 >
-  <nav class="mx-auto max-w-screen-lg px-[var(--space-content)]">
+  <nav
+    class="pointer-events-auto flex items-center gap-0.5 rounded-full border border-[var(--border)] bg-[color-mix(in_srgb,var(--background)_82%,transparent)] p-1 shadow-[0_1px_2px_rgb(0_0_0/0.04)] backdrop-blur-[16px]"
+    aria-label="주요 메뉴"
+  >
     <Navigation />
   </nav>
 </header>

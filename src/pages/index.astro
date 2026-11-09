@@ -1,24 +1,26 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import HomeHero from "../components/HomeHero.astro";
-import StoryList from "../components/StoryList.astro";
+import StoryListItem from "../components/StoryListItem.astro";
 import { getPosts } from "../utils/notion";
 
 const pageTitle = "seunghoonkang.dev";
 const description =
   "개발과 그 외 배운 것을 기록합니다. 궁금한 것을 남기고, 왜 그런지 차근차근 파고듭니다.";
 
-const allNotes = await getPosts();
-const recentNotes = allNotes
-  .toSorted(
-    (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
-  )
-  .slice(0, 9);
+const notes = (await getPosts()).toSorted(
+  (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
+);
 ---
 
 <BaseLayout pageTitle={pageTitle} description={description}>
-  <div class="px-[var(--space-content)]">
-    <HomeHero />
-    <StoryList notes={recentNotes} heading="최근 글" headingId="recent-notes-heading" />
-  </div>
+  <h1 class="sr-only">{pageTitle}</h1>
+  <ul class="appear flex flex-col gap-12">
+    {
+      notes.map((note, i) => (
+        <li>
+          <StoryListItem note={note} eager={i === 0} />
+        </li>
+      ))
+    }
+  </ul>
 </BaseLayout>
