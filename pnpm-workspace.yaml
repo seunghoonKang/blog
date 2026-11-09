@@ -1,0 +1,3 @@
+# 이 프로젝트의 pnpm 명령(dev/build/install 등)은 항상 Node 24로 실행
+# (Vercel은 .npmrc의 use-node-version을 거부하므로 여기서 설정)
+useNodeVersion: 24.22.2
