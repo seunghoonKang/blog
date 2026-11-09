@@ -30,40 +30,40 @@
 /* 라이트 모드 색상 */
 :root,
 html[data-theme="light"] {
-  --background: #faf9f7;
-  --foreground: #1c1c1e;
-  --muted: #f0eeeb;
-  --border: #e4e2de;
+  --background: #ffffff;
+  --foreground: #1f2328;
+  --muted: #f1f3f5;
+  --border: #e6e8eb;
   --accent: #2d6a6a;
   --accent-muted: color-mix(in srgb, var(--accent) 12%, var(--background));
   --surface: #ffffff;
-  --surface-hover: #f3f1ed;
-  --muted-foreground: #6b6b6f;
+  --surface-hover: #f1f3f5;
+  --muted-foreground: #818b98; /* 날짜·메타 */
+  --muted-strong: #59636e; /* 상세 날짜·아이콘·네비 */
 
-  /* 유동 간격 (375px ~ 1024px 뷰포트) */
-  --header-height: clamp(
-    4rem,
-    3.5rem + 1.5vw,
-    5rem
-  ); /* fixed 헤더 높이 (py-5 + nav) */
-  --space-page-y: clamp(5rem, 4.08rem + 3.08vw, 8rem);
-  --space-section-y: clamp(1.5rem, 1.27rem + 0.77vw, 2.5rem);
-  --space-content: clamp(1rem, 0.88rem + 0.31vw, 1.5rem);
+  /* 레이아웃 */
+  --content-max: 560px; /* 단일 컬럼 폭 */
+  --dock-top: 1rem; /* pill dock 상단 여백 */
+  --header-height: calc(var(--dock-top) + 3.5rem); /* dock top + dock 높이 */
+  --space-page-y: 5rem; /* 80px */
+  --space-section-y: 2rem; /* 32px */
+  --space-content: 1.25rem; /* 20px 좌우 패딩 */
   --space-card: clamp(0.75rem, 0.68rem + 0.31vw, 1rem);
   --space-element: clamp(0.5rem, 0.44rem + 0.15vw, 0.75rem);
 }
 
 /* 다크 모드 색상 */
 html[data-theme="dark"] {
-  --background: #141416;
-  --foreground: #f2f2f3;
-  --muted: #232326;
-  --border: #3a3a3e;
+  --background: #121316;
+  --foreground: #e6e8eb;
+  --muted: #1e2025;
+  --border: #2c2f35;
   --accent: #5ba8a8;
   --accent-muted: color-mix(in srgb, var(--accent) 18%, var(--background));
-  --surface: #1e1e21;
-  --surface-hover: #26262a;
-  --muted-foreground: #a1a1a6;
+  --surface: #17181c;
+  --surface-hover: #1e2025;
+  --muted-foreground: #8a929c;
+  --muted-strong: #a0a7af;
 }
 
 html {
@@ -84,6 +84,7 @@ body {
 
 .share-note {
   display: flex;
+  flex-direction: row-reverse;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
@@ -96,10 +97,10 @@ body {
   padding: 0.25rem 0.625rem;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--accent);
+  color: var(--muted-strong);
   background: transparent;
   border: 1px solid var(--border);
-  border-radius: 0.375rem;
+  border-radius: 9999px;
   cursor: pointer;
   transition:
     background-color 0.15s ease,
@@ -107,8 +108,8 @@ body {
 }
 
 .share-note__button:hover {
-  background-color: var(--surface-hover);
-  border-color: var(--accent);
+  background-color: var(--muted);
+  color: var(--foreground);
 }
 
 .share-note__status {
@@ -117,6 +118,11 @@ body {
   min-height: 1.25rem;
 }
 
+.text-muted-strong {
+  color: var(--muted-strong);
+}
+
+/* career 페이지 등에서 사용 */
 .tag-pill {
   display: inline-block;
   padding: 0.15rem 0.5rem;
@@ -128,98 +134,120 @@ body {
   white-space: nowrap;
 }
 
-.story-row {
-  display: block;
-  padding: var(--space-card);
-  border-radius: 0.25rem;
-  transition: transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .story-row:hover {
-    transform: translateX(0.35rem);
+/* 등장 애니메이션: 아래에서 16px 떠오르며 페이드인 */
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
-.story-row__date {
-  display: inline-block;
-  transition:
-    transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1),
-    color 0.35s ease;
+.appear {
+  animation: appear 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .story-row:hover .story-row__date {
-    transform: translateX(0.15rem);
-    color: var(--accent);
+@media (prefers-reduced-motion: reduce) {
+  .appear {
+    animation: none;
   }
 }
 
+/* 목록 항목 */
 .story-title {
-  display: inline;
-  background-image: linear-gradient(var(--accent), var(--accent));
-  background-position: 0 100%;
-  background-repeat: no-repeat;
-  background-size: 0% 2px;
-  transition: background-size 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
 }
 
-.story-row:hover .story-title {
-  background-size: 100% 2px;
+.story-row:hover .story-title,
+.story-row:focus-visible .story-title {
+  text-decoration-line: underline;
 }
 
-.story-summary {
-  transition: opacity 0.35s ease;
+.story-thumb img {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.story-row:hover .story-summary {
-  opacity: 1;
+@media (prefers-reduced-motion: no-preference) {
+  .story-row:hover .story-thumb img {
+    transform: scale(1.02);
+  }
 }
 
-.media-frame {
-  background-color: var(--surface);
-  border: 1px solid var(--border);
+/* 썸네일 로딩 shimmer: 이미지 로드 후 data-loaded로 제거 */
+.media-shimmer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background-color: var(--muted);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
 }
 
-.media-frame img {
-  display: block;
+.media-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--background) 65%, transparent) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+[data-loaded] > .media-shimmer {
+  opacity: 0;
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-shimmer::after {
+    animation: none;
+  }
 }
 
 .prose-reading {
-  max-width: 42rem;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: var(--content-max);
 }
 
-.article-lead {
-  margin-top: var(--space-card);
-  padding-left: var(--space-content);
-  border-left: 2px solid var(--accent);
-  color: var(--muted-foreground);
-  font-size: var(--text-lg);
-  line-height: var(--text-lg--line-height);
+/* 다크모드 토글 / dock 아이콘 버튼 */
+.dock-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  color: var(--muted-strong);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
 }
 
-.toc-link {
-  color: var(--muted-foreground);
-  border-left: 2px solid transparent;
-  padding-left: 0.5rem;
-  margin-left: -0.5rem;
+.dock-icon-button:hover {
+  background-color: var(--muted);
+  color: var(--foreground);
 }
 
-.toc-link:hover {
-  color: var(--accent);
+.dock-icon-button.is-current {
+  color: var(--foreground);
 }
 
-.toc-link.is-active {
-  color: var(--accent);
-  border-left-color: var(--accent);
-  font-weight: 500;
-}
-
-.year-heading {
-  padding-left: var(--space-card);
-  border-left: 3px solid var(--accent);
+.dock-icon-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 /* Prose 스타일 커스터마이징 */
@@ -237,10 +265,10 @@ body {
   --tw-prose-td-borders: var(--border);
 }
 
-/* Prose 유동 타이포그래피 (Notion 등 HTML 콘텐츠) - @tailwindcss/typography의 고정 rem 오버라이드 */
+/* Prose 본문 타이포그래피 (Notion 등 HTML 콘텐츠) - 17px / 180% */
 .prose {
-  font-size: var(--text-base);
-  line-height: var(--text-base--line-height);
+  font-size: 1.0625rem;
+  line-height: 1.8;
 }
 
 /* 다크모드 prose */
@@ -249,9 +277,9 @@ html[data-theme="dark"] .prose {
   --tw-prose-headings: var(--foreground);
   --tw-prose-links: var(--accent);
   --tw-prose-bold: var(--foreground);
-  --tw-prose-code: #e2e8f0;
+  --tw-prose-code: var(--foreground);
   --tw-prose-pre-bg: var(--muted);
-  --tw-prose-quotes: #cbd5e1;
+  --tw-prose-quotes: var(--foreground);
   --tw-prose-quote-borders: var(--border);
   --tw-prose-hr: var(--border);
   --tw-prose-th-borders: var(--border);
@@ -260,18 +288,18 @@ html[data-theme="dark"] .prose {
 
 /* 추가 마크다운 스타일 */
 .prose pre {
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   padding: var(--space-content);
   overflow-x: auto;
 }
 
 .prose code {
-  /* Notion 기본 인라인 코드 색상: 빨간색 */
-  color: #d44c47;
-  background-color: var(--muted);
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.25rem;
+  color: var(--foreground);
+  background-color: color-mix(in srgb, var(--foreground) 8%, transparent);
+  padding: 0.1em 0.35em;
+  border-radius: 6px;
   font-size: 0.875em;
+  font-weight: 400;
   font-family:
     ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
     monospace;
@@ -397,7 +425,7 @@ html[data-theme="dark"] .prose pre.shiki {
 }
 
 .prose img {
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   margin-top: var(--space-section-y);
   margin-bottom: var(--space-section-y);
 }
@@ -424,7 +452,7 @@ html[data-theme="dark"] .prose pre.shiki {
 
 .prose .prose-table th,
 .prose .prose-table td {
-  border: 1px solid var(--border-color, #e5e7eb);
+  border: 1px solid var(--border);
   padding: 0.5em 0.75em;
   text-align: left;
 }
@@ -502,42 +530,34 @@ html[data-theme="dark"] .prose pre.shiki {
   margin-bottom: 0;
 }
 
-/* prose 제목: @theme 유동 타이포그래피 적용 */
-.prose h1 {
-  font-size: var(--text-4xl);
-  line-height: var(--text-4xl--line-height);
-  margin-top: 1.5em;
-  margin-bottom: 0.75em;
+/* prose 제목 */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  font-weight: 600;
+  margin-top: 2em;
+  margin-bottom: 0.6em;
 }
+.prose h1,
 .prose h2 {
-  font-size: var(--text-3xl);
-  line-height: var(--text-3xl--line-height);
-  margin-top: 1.5em;
-  margin-bottom: 0.75em;
+  font-size: 1.5rem; /* 24px */
+  line-height: 1.5;
 }
 .prose h3 {
-  font-size: var(--text-2xl);
-  line-height: var(--text-2xl--line-height);
-  margin-top: 1.5em;
-  margin-bottom: 0.75em;
+  font-size: 1.1875rem; /* 19px */
+  line-height: 1.5;
 }
 .prose h4 {
-  font-size: var(--text-xl);
-  line-height: var(--text-xl--line-height);
-  margin-top: 1.5em;
-  margin-bottom: 0.75em;
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.4;
 }
-.prose h5 {
-  font-size: var(--text-lg);
-  line-height: var(--text-lg--line-height);
-  margin-top: 1.5em;
-  margin-bottom: 0.75em;
-}
+.prose h5,
 .prose h6 {
-  font-size: var(--text-base);
-  line-height: var(--text-base--line-height);
-  margin-top: 1.5em;
-  margin-bottom: 0.75em;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 .prose h1:first-child,

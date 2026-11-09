@@ -8,6 +8,10 @@ import remarkToc from "remark-toc";
 // https://astro.build/config
 export default defineConfig({
   site: "https://seunghoonkang.dev",
+  // 노트 목록이 메인(/)으로 이동
+  redirects: {
+    "/notes": "/",
+  },
   vite: {
     // eslint-disable-next-line
     // @ts-ignore

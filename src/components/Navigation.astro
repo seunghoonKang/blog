@@ -1,34 +1,95 @@
 ---
-import DarkIcon from "../assets/dark_icon.svg";
-import LightIcon from "../assets/light_icon.svg";
+const pathname = decodeURI(Astro.url.pathname).replace(/\/+$/, "") || "/";
+
+const links = [
+  {
+    href: "/",
+    label: "홈",
+    icon: "home",
+    isCurrent: pathname === "/" || pathname.startsWith("/notes"),
+  },
+  {
+    href: "/career",
+    label: "나",
+    icon: "person",
+    isCurrent: pathname.startsWith("/career"),
+  },
+] as const;
 ---
 
-<div class="flex flex-nowrap items-center justify-between">
-  <a
-    href="/"
-    class="rounded-md px-2 py-2 text-sm font-semibold tracking-tight transition-opacity duration-200 hover:opacity-80"
+{
+  links.map(({ href, label, icon, isCurrent }) => (
+    <a
+      href={href}
+      class:list={["dock-icon-button", { "is-current": isCurrent }]}
+      aria-label={label}
+      title={label}
+      aria-current={isCurrent ? "page" : undefined}
+    >
+      {icon === "home" && (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M3.5 10.2 12 3.5l8.5 6.7V19a1.5 1.5 0 0 1-1.5 1.5h-4v-6h-6v6H5A1.5 1.5 0 0 1 3.5 19z" />
+        </svg>
+      )}
+      {icon === "person" && (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4.5 20.5a7.5 7.5 0 0 1 15 0" />
+        </svg>
+      )}
+    </a>
+  ))
+}
+
+<span class="mx-1 h-5 w-px bg-[var(--border)]" aria-hidden="true"></span>
+
+<button
+  id="toggle-theme"
+  type="button"
+  class="dock-icon-button"
+  title="다크 모드 전환"
+  aria-label="다크 모드 전환"
+>
+  <!-- 라이트 모드일 때: 달 아이콘(다크로 전환) -->
+  <svg
+    class="dark:hidden"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
   >
-    seunghoonkang<span class="text-[var(--accent)]">.dev</span>
-  </a>
-  <div class="flex gap-8">
-    <a
-      href="/notes"
-      class="flex items-center rounded-md px-2 text-sm transition-colors duration-200 hover:text-[var(--accent)]"
-      >노트</a
-    >
-    <a
-      href="/career"
-      class="flex items-center rounded-md px-2 text-sm transition-colors duration-200 hover:text-[var(--accent)]"
-      >나</a
-    >
-    <button
-      id="toggle-theme"
-      class="flex cursor-pointer items-center rounded-md transition-all duration-300 ease-in-out hover:scale-105"
-      title="Toggle dark mode"
-      aria-label="auto"
-    >
-      <span class="dark:hidden"><LightIcon /></span>
-      <span class="hidden dark:inline"><DarkIcon /></span>
-    </button>
-  </div>
-</div>
+    <path
+      d="M12 22c5.523 0 10-4.477 10-10c0-.463-.694-.54-.933-.143a6.5 6.5 0 1 1-8.924-8.924C12.54 2.693 12.463 2 12 2C6.477 2 2 6.477 2 12s4.477 10 10 10"
+    ></path>
+  </svg>
+  <!-- 다크 모드일 때: 해 아이콘(라이트로 전환) -->
+  <svg
+    class="hidden dark:block"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4.5"></circle>
+    <path
+      d="M12 2v1.5M12 20.5V22M4.93 4.93l1.06 1.06M18.01 18.01l1.06 1.06M2 12h1.5M20.5 12H22M4.93 19.07l1.06-1.06M18.01 5.99l1.06-1.06"
+    ></path>
+  </svg>
+</button>

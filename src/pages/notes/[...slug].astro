@@ -7,7 +7,6 @@ import {
   getNotePathSlugs,
   buildNoteShareUrl,
 } from "../../utils/notion";
-import { getRelatedNotes } from "../../utils/relatedNotes";
 
 export async function getStaticPaths() {
   const notes = await getPosts();
@@ -20,11 +19,15 @@ export async function getStaticPaths() {
 }
 
 const { note, canonicalPathSlug } = Astro.props;
-const allNotes = await getPosts();
-const related = getRelatedNotes(allNotes, note).map(n => ({
-  title: n.title,
-  slug: getNotePathSlug(n),
-}));
+// 최신순 정렬 기준: 다음글 = 더 최근 글, 이전글 = 더 오래된 글
+const sortedNotes = (await getPosts()).toSorted(
+  (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
+);
+const index = sortedNotes.findIndex(n => n.id === note.id);
+const toAdjacent = (n: (typeof sortedNotes)[number] | undefined) =>
+  n ? { title: n.title, href: `/notes/${getNotePathSlug(n)}` } : undefined;
+const nextNote = index > 0 ? toAdjacent(sortedNotes[index - 1]) : undefined;
+const prevNote = index >= 0 ? toAdjacent(sortedNotes[index + 1]) : undefined;
 const { content, headings } = await getNoteContent(note);
 
 const sidebarHeadings = headings.filter(
@@ -45,7 +48,8 @@ const canonicalUrl = buildNoteShareUrl(Astro.site ?? Astro.url, note);
     tags: note.tags,
   }}
   sidebarHeadings={sidebarHeadings}
-  relatedNotes={related}
+  prevNote={prevNote}
+  nextNote={nextNote}
   comments
   shareUrl={shareUrl}
   canonicalPathSlug={canonicalPathSlug}

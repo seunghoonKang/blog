@@ -11,6 +11,8 @@ interface Props {
   pubDate?: Date;
   noindex?: boolean;
   canonicalUrl?: string;
+  /** 본문 컬럼 폭. 기본은 560px 단일 컬럼, wide는 이력 페이지처럼 정보가 많은 페이지용 */
+  width?: "narrow" | "wide";
 }
 
 const {
@@ -21,12 +23,12 @@ const {
   pubDate,
   noindex = false,
   canonicalUrl: canonicalUrlProp,
+  width = "narrow",
 } = Astro.props;
 
 const siteName = "seunghoonkang.dev";
 const canonicalUrl =
-  canonicalUrlProp ??
-  new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+  canonicalUrlProp ?? new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
 const pageUrl = canonicalUrl;
 const imageUrl = image?.url ? new URL(image.url, Astro.url).href : undefined;
 ---
@@ -53,21 +55,21 @@ const imageUrl = image?.url ? new URL(image.url, Astro.url).href : undefined;
     <meta property="og:url" content={pageUrl} />
     <meta property="og:type" content={ogType} />
     <meta property="og:locale" content="ko_KR" />
-    {ogType === "article" && pubDate && (
-      <meta
-        property="article:published_time"
-        content={pubDate.toISOString()}
-      />
-    )}
+    {
+      ogType === "article" && pubDate && (
+        <meta
+          property="article:published_time"
+          content={pubDate.toISOString()}
+        />
+      )
+    }
 
     <meta
       name="twitter:card"
       content={imageUrl ? "summary_large_image" : "summary"}
     />
     <meta name="twitter:title" content={pageTitle} />
-    {description && (
-      <meta name="twitter:description" content={description} />
-    )}
+    {description && <meta name="twitter:description" content={description} />}
     {imageUrl && <meta name="twitter:image" content={imageUrl} />}
 
     <link
@@ -80,13 +82,16 @@ const imageUrl = image?.url ? new URL(image.url, Astro.url).href : undefined;
     {imageUrl && <link rel="preload" as="image" href={imageUrl} />}
     <script is:inline src="/toggle-theme.js"></script>
   </head>
-  <body class="mx-auto my-0 max-w-screen-lg">
+  <body>
     <Header />
     <main
-      class="pt-[calc(var(--header-height)+var(--space-section-y))] pb-[var(--space-page-y)]"
+      class:list={[
+        "mx-auto w-full px-[var(--space-content)] pt-[calc(var(--header-height)+var(--space-section-y))] pb-[var(--space-page-y)]",
+        width === "wide" ? "max-w-[720px]" : "max-w-[var(--content-max)]",
+      ]}
     >
       <slot />
     </main>
-    <Footer />
+    <Footer width={width} />
   </body>
 </html>
